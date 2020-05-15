@@ -23,8 +23,7 @@ extension DropInComponent {
         /// Indicates any `RedirectComponent` UI style.
         public var redirectComponent: RedirectComponentStyle?
         
-        /// Initializes the instance with default style.
+        /// Initializes the instance of DropIn style with the default values.
         public init() {}
-        
     }
 }

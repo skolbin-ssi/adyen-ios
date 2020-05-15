@@ -11,7 +11,7 @@ import Foundation
 public final class FormFooterItem: FormItem {
     
     /// Indicates the `FormFooterItemView` UI styling.
-    public let style: Style
+    public let style: FormFooterStyle
     
     /// :nodoc:
     public var identifier: String?
@@ -22,7 +22,7 @@ public final class FormFooterItem: FormItem {
     /// The title of the submit button.
     public var submitButtonTitle: String?
     
-    /// The title of the submit button.
+    /// The observable of the button indicator activity.
     public var showsActivityIndicator = Observable(false)
     
     /// A closure that will be invoked when the submit button is selected.
@@ -31,8 +31,12 @@ public final class FormFooterItem: FormItem {
     /// Initializes the footer item.
     ///
     /// - Parameter style: The `FormFooterItemView` UI style.
-    public init(style: Style = Style()) {
+    public init(style: FormFooterStyle = FormFooterStyle()) {
         self.style = style
+    }
+    
+    public func build(with builder: FormItemViewBuilder) -> AnyFormItemView {
+        builder.build(with: self)
     }
     
 }

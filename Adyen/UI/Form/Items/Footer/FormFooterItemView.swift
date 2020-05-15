@@ -16,6 +16,7 @@ internal final class FormFooterItemView: FormItemView<FormFooterItem>, Observer 
         super.init(item: item)
         
         layoutMargins.top = 24.0
+        layoutMargins.bottom = 24.0
         
         addSubview(stackView)
         
@@ -39,9 +40,6 @@ internal final class FormFooterItemView: FormItemView<FormFooterItem>, Observer 
         }
         submitButton.title = item.submitButtonTitle
         submitButton.addTarget(self, action: #selector(didSelectSubmitButton), for: .touchUpInside)
-        submitButton.accessibilityIdentifier = item.identifier.map {
-            ViewIdentifierBuilder.build(scopeInstance: $0, postfix: "submitButton")
-        }
         
         return submitButton
     }()

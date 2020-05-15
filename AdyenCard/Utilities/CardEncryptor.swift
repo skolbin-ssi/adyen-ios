@@ -112,7 +112,7 @@ public final class CardEncryptor {
             return
         }
         let session = URLSession(configuration: .default)
-        session.dataTask(with: url) { result in
+        session.adyen.dataTask(with: url) { result in
             switch result {
             case let .success(data):
                 do {
@@ -136,7 +136,7 @@ public final class CardEncryptor {
     
     /// Encrypts a card.
     /// This methods encapsulates calls to `requestPublicKey(forToken:environment:completion:)`
-    /// and `encryptedCard(for:publicKey:)`
+    /// and `encryptedCard(for:publicKey:)`.
     ///
     /// - Parameters:
     ///   - card: Card containing the data to be encrypted.
@@ -166,7 +166,7 @@ public final class CardEncryptor {
     
     /// Encrypts a card.
     /// This methods encapsulates calls to `requestPublicKey(forToken:environment:completion:)`
-    /// and `encrypt(_:publicKey:)`
+    /// and `encrypt(_:publicKey:)`.
     ///
     /// - Parameters:
     ///   - card: Card containing the data to be encrypted.

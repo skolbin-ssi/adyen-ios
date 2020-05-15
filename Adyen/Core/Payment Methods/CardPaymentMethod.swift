@@ -33,6 +33,11 @@ public struct CardPaymentMethod: AnyCardPaymentMethod {
         self.brands = try container.decodeIfPresent([String].self, forKey: .brands) ?? []
     }
     
+    /// :nodoc:
+    public func buildComponent(using builder: PaymentComponentBuilder) -> PaymentComponent? {
+        return builder.build(paymentMethod: self)
+    }
+    
     internal init(type: String, name: String, brands: [String]) {
         self.type = type
         self.name = name
@@ -66,11 +71,16 @@ public struct StoredCardPaymentMethod: StoredPaymentMethod {
     
     /// :nodoc:
     public func localizedDisplayInformation(using parameters: LocalizationParameters?) -> DisplayInformation {
-        let expireDate = expiryMonth + "/" + expiryYear
+        let expireDate = expiryMonth + "/" + String(expiryYear.suffix(2))
         
         return DisplayInformation(title: "••••\u{00a0}" + lastFour,
                                   subtitle: ADYLocalizedString("adyen.card.stored.expires", parameters, expireDate),
                                   logoName: brand)
+    }
+    
+    /// :nodoc:
+    public func buildComponent(using builder: PaymentComponentBuilder) -> PaymentComponent? {
+        return builder.build(paymentMethod: self)
     }
     
     /// :nodoc:

@@ -16,13 +16,13 @@ internal final class PaymentMethodListComponent: PresentableComponent, Localizab
     internal weak var delegate: PaymentMethodListComponentDelegate?
     
     /// Describes the component's UI style.
-    internal let style: AnyListComponentStyle
+    internal let style: ListComponentStyle
     
     /// Initializes the list component.
     ///
     /// - Parameter components: The components to display in the list.
     /// - Parameter style: The component's UI style.
-    internal init(components: SectionedComponents, style: AnyListComponentStyle = ListComponentStyle()) {
+    internal init(components: SectionedComponents, style: ListComponentStyle = ListComponentStyle()) {
         self.components = components
         self.style = style
     }
@@ -30,16 +30,14 @@ internal final class PaymentMethodListComponent: PresentableComponent, Localizab
     // MARK: - View Controller
     
     /// :nodoc:
-    internal lazy var viewController: UIViewController = {
-        listViewController
-    }()
+    internal var viewController: UIViewController { listViewController }
     
     internal lazy var listViewController: ListViewController = {
         func item(for component: PaymentComponent) -> ListItem {
-            let showsDisclosureIndicator = (component as? PresentableComponent)?.preferredPresentationMode == .push
+            let showsDisclosureIndicator = (component as? PresentableComponent)?.requiresModalPresentation == true
             
             let displayInformation = component.paymentMethod.localizedDisplayInformation(using: localizationParameters)
-            var listItem = ListItem(title: displayInformation.title, style: style.listItem)
+            let listItem = ListItem(title: displayInformation.title, style: style.listItem)
             listItem.identifier = ViewIdentifierBuilder.build(scopeInstance: self, postfix: listItem.title)
             listItem.imageURL = LogoURLProvider.logoURL(for: component.paymentMethod, environment: environment)
             listItem.subtitle = displayInformation.subtitle

@@ -8,7 +8,13 @@ import Foundation
 
 /// Displays a list item.
 /// :nodoc:
-public final class ListItemView: UIView {
+public final class ListItemView: UIView, AnyFormItemView {
+    
+    /// :nodoc:
+    public weak var delegate: FormItemViewDelegate?
+    
+    /// :nodoc:
+    public var childItemViews: [AnyFormItemView] = []
     
     /// Initializes the list item view.
     public init() {
@@ -17,6 +23,7 @@ public final class ListItemView: UIView {
         addSubview(imageView)
         addSubview(textStackView)
         
+        preservesSuperviewLayoutMargins = true
         configureConstraints()
     }
     
@@ -35,21 +42,18 @@ public final class ListItemView: UIView {
     }
     
     private func updateItemView() {
-        updateTextStackView()
         updateTitleLabel()
         updateSubtitleLabel()
         updateImageView()
-    }
-    
-    private func updateTextStackView() {
-        textStackView.backgroundColor = item?.style.backgroundColor
+        backgroundColor = item?.style.backgroundColor
+        accessibilityIdentifier = item?.identifier
     }
     
     private func updateTitleLabel() {
         titleLabel.text = item?.title
         
         titleLabel.font = item?.style.title.font ?? .systemFont(ofSize: 17.0)
-        titleLabel.textColor = item?.style.title.color ?? .componentLabel
+        titleLabel.textColor = item?.style.title.color ?? UIColor.AdyenCore.componentLabel
         titleLabel.backgroundColor = item?.style.title.backgroundColor
         titleLabel.textAlignment = item?.style.title.textAlignment ?? .natural
         titleLabel.accessibilityIdentifier = item?.identifier.map { ViewIdentifierBuilder.build(scopeInstance: $0, postfix: "titleLabel") }
@@ -60,7 +64,7 @@ public final class ListItemView: UIView {
         subtitleLabel.isHidden = item?.subtitle?.isEmpty ?? true
         
         subtitleLabel.font = item?.style.subtitle.font ?? .systemFont(ofSize: 14.0)
-        subtitleLabel.textColor = item?.style.subtitle.color ?? .componentSecondaryLabel
+        subtitleLabel.textColor = item?.style.subtitle.color ?? UIColor.AdyenCore.componentSecondaryLabel
         subtitleLabel.backgroundColor = item?.style.subtitle.backgroundColor
         subtitleLabel.textAlignment = item?.style.subtitle.textAlignment ?? .natural
         subtitleLabel.accessibilityIdentifier = item?.identifier.map {
@@ -74,7 +78,7 @@ public final class ListItemView: UIView {
         imageView.clipsToBounds = item?.style.image.clipsToBounds ?? true
         imageView.layer.cornerRadius = item?.style.image.cornerRadius ?? 4.0
         imageView.layer.borderWidth = item?.style.image.borderWidth ?? 1.0 / UIScreen.main.nativeScale
-        imageView.layer.borderColor = item?.style.image.borderColor?.cgColor ?? UIColor.componentSeparator.cgColor
+        imageView.layer.borderColor = item?.style.image.borderColor?.cgColor ?? UIColor.AdyenCore.componentSeparator.cgColor
     }
     
     // MARK: - Image View
@@ -82,6 +86,7 @@ public final class ListItemView: UIView {
     private lazy var imageView: NetworkImageView = {
         let imageView = NetworkImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.preservesSuperviewLayoutMargins = true
         
         return imageView
     }()
@@ -110,10 +115,10 @@ public final class ListItemView: UIView {
     private lazy var textStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
         stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.setContentHuggingPriority(.required, for: .vertical)
         stackView.axis = .vertical
         stackView.alignment = .leading
-        stackView.distribution = .fillProportionally
-        
+        stackView.distribution = .fill
         return stackView
     }()
     
@@ -124,15 +129,15 @@ public final class ListItemView: UIView {
             imageView.topAnchor.constraint(greaterThanOrEqualTo: topAnchor),
             imageView.centerYAnchor.constraint(equalTo: centerYAnchor),
             imageView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor),
-            imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            imageView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
             imageView.widthAnchor.constraint(equalToConstant: 40.0),
             imageView.heightAnchor.constraint(equalToConstant: 26.0),
             
-            textStackView.topAnchor.constraint(equalTo: topAnchor),
+            textStackView.topAnchor.constraint(greaterThanOrEqualTo: layoutMarginsGuide.topAnchor),
+            textStackView.centerYAnchor.constraint(equalTo: centerYAnchor),
             textStackView.leadingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: 16.0),
             textStackView.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
-            textStackView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            textStackView.centerYAnchor.constraint(equalTo: layoutMarginsGuide.centerYAnchor)
+            textStackView.bottomAnchor.constraint(lessThanOrEqualTo: layoutMarginsGuide.bottomAnchor)
         ]
         
         NSLayoutConstraint.activate(constraints)
@@ -144,7 +149,7 @@ public final class ListItemView: UIView {
     public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
-        imageView.layer.borderColor = item?.style.image.borderColor?.cgColor ?? UIColor.componentSeparator.cgColor
+        imageView.layer.borderColor = item?.style.image.borderColor?.cgColor ?? UIColor.AdyenCore.componentSeparator.cgColor
     }
     
 }
