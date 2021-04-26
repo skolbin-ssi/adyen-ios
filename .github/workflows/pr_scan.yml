@@ -1,0 +1,85 @@
+name: Scan PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+
+  build:
+    env:
+      sonarToken: ${{ secrets.SONAR_TOKEN }}
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: n1hility/cancel-previous-runs@v2
+      with:
+        token: ${{ secrets.MANUAL_ACTION_TOKEN }}
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+
+    - name: Install Tools
+      run: |
+        brew install sonar-scanner
+        gem install slather
+
+    - name: Check Dependencie Cache
+      uses: actions/cache@v1
+      id: carthage-cache
+      with:
+        path: Carthage
+        key: ${{ runner.os }}-carthage-${{ hashFiles('**/Cartfile.resolved') }}
+
+    - name: Install Dependencies
+      if: steps.carthage-cache.outputs.cache-hit != 'true'
+      run: |
+        if [[ $(carthage outdated) == *"Latest"* ]] ; then
+          rm Cartfile.resolved
+        fi
+        carthage bootstrap --platform iOS --cache-builds
+      env:
+         GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and test
+      run: |
+        xcodebuild -version
+        xcodebuild build test -project "${project}" -scheme "${scheme}" ${params} -destination "${destination}" | xcpretty && exit ${PIPESTATUS[0]}
+      env:
+        project: 'Adyen.xcodeproj'
+        params: '-derivedDataPath ./DerivedData -enableCodeCoverage YES'
+        scheme: 'AdyenUIHost'
+        destination: 'name=iPhone 11'
+
+    - name: Slather
+      run: |
+        slather coverage --sonarqube-xml ${params} ${project}
+      env:
+        project: 'Adyen.xcodeproj'
+        params: '--build-directory ./DerivedData
+        --output-directory ./reports
+        --scheme AdyenUIHost
+        --binary-basename Adyen
+        --binary-basename AdyenCard
+        --binary-basename AdyenDropIn
+        --binary-basename AdyenWeChatPay
+        --binary-basename AdyenComponents
+        --binary-basename AdyenEncryption
+        --binary-basename AdyenActions'
+
+    - name: SwiftLint
+      run: |
+        fastlane run swiftlint output_file:"./reports/swiftlint.json" reporter:"json" ignore_exit_status:"true"
+
+    - name: Run Sonar
+      if: ${{ env.sonarToken != 0 }}
+      run: |
+        git fetch --unshallow --no-tags
+        sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run_id: ${{ github.event.number }}
+        head: ${{ github.head_ref }}
+        base: ${{ github.base_ref }}
+        repo: ${{ github.repository }}

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -34,18 +34,11 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
         
         addSubview(textStackView)
         
-        backgroundColor = item.style.backgroundColor
-        
         configureConstraints()
     }
     
-    /// :nodoc:
-    public required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
     private var textDelegate: FormTextItemViewDelegate? {
-        return delegate as? FormTextItemViewDelegate
+        delegate as? FormTextItemViewDelegate
     }
     
     // MARK: - Stack View
@@ -76,16 +69,19 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
         stackView.axis = .horizontal
         stackView.alignment = .fill
         stackView.isLayoutMarginsRelativeArrangement = true
+        stackView.isHidden = true
         stackView.layoutMargins.bottom = abs(item.style.text.font.descender)
         
         return stackView
     }()
     
     // MARK: - Title Label
-    
-    private lazy var titleLabel: UILabel = {
+
+    /// :nodoc:
+    public lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.font = item.style.title.font
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textColor = item.style.title.color
         titleLabel.textAlignment = item.style.title.textAlignment
         titleLabel.backgroundColor = item.style.title.backgroundColor
@@ -101,6 +97,7 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
     public lazy var textField: UITextField = {
         let textField = TextField()
         textField.font = item.style.text.font
+        textField.adjustsFontForContentSizeCategory = true
         textField.textColor = item.style.text.color
         textField.textAlignment = item.style.text.textAlignment
         textField.backgroundColor = item.style.backgroundColor
@@ -123,6 +120,7 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
     private lazy var alertLabel: UILabel = {
         let alertLabel = UILabel()
         alertLabel.font = item.style.title.font
+        alertLabel.adjustsFontForContentSizeCategory = true
         alertLabel.textColor = item.style.errorColor
         alertLabel.textAlignment = item.style.title.textAlignment
         alertLabel.backgroundColor = item.style.title.backgroundColor
@@ -156,9 +154,12 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
         case let .customView(view):
             accessoryView = view
         default:
+            accessoryStackView.isHidden = true
             return
         }
         
+        accessoryStackView.isHidden = false
+        accessoryView.tintColor = item.style.icon.tintColor
         accessoryStackView.addArrangedSubview(accessoryView)
     }
     
@@ -214,13 +215,13 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
     // MARK: - Validation
     
     /// :nodoc:
-    public override func validate() {
+    override public func validate() {
         updateValidationStatus(forced: true)
     }
     
     // MARK: - Editing
     
-    internal override func didChangeEditingStatus() {
+    override internal func didChangeEditingStatus() {
         super.didChangeEditingStatus()
         let customColor = (accessory == .invalid) ? item.style.errorColor : item.style.title.color
         titleLabel.textColor = isEditing ? tintColor : customColor
@@ -229,7 +230,7 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
     // MARK: - Layout
     
     /// :nodoc:
-    open override func configureSeparatorView() {
+    override open func configureSeparatorView() {
         let constraints = [
             separatorView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
             separatorView.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -240,43 +241,36 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
     }
     
     private func configureConstraints() {
-        let constraints = [
-            textStackView.topAnchor.constraint(equalTo: topAnchor),
-            textStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            textStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            textStackView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            separatorView.bottomAnchor.constraint(equalTo: accessoryStackView.bottomAnchor, constant: 4)
-        ]
-        
-        NSLayoutConstraint.activate(constraints)
+        textStackView.adyen.anchore(inside: self)
+        separatorView.bottomAnchor.constraint(equalTo: accessoryStackView.bottomAnchor, constant: 4).isActive = true
     }
     
-    open override var lastBaselineAnchor: NSLayoutYAxisAnchor {
-        return textField.lastBaselineAnchor
+    override open var lastBaselineAnchor: NSLayoutYAxisAnchor {
+        textField.lastBaselineAnchor
     }
     
     // MARK: - Interaction
     
     /// :nodoc:
-    open override var canBecomeFirstResponder: Bool {
-        return textField.canBecomeFirstResponder
+    override open var canBecomeFirstResponder: Bool {
+        textField.canBecomeFirstResponder
     }
     
     /// :nodoc:
     @discardableResult
-    open override func becomeFirstResponder() -> Bool {
-        return textField.becomeFirstResponder()
+    override open func becomeFirstResponder() -> Bool {
+        textField.becomeFirstResponder()
     }
     
     /// :nodoc:
     @discardableResult
-    open override func resignFirstResponder() -> Bool {
-        return textField.resignFirstResponder()
+    override open func resignFirstResponder() -> Bool {
+        textField.resignFirstResponder()
     }
     
     /// :nodoc:
-    open override var isFirstResponder: Bool {
-        return textField.isFirstResponder
+    override open var isFirstResponder: Bool {
+        textField.isFirstResponder
     }
     
     // MARK: - UITextFieldDelegate
@@ -305,10 +299,14 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
             accessory = .none
         }
     }
-    
-    private func updateValidationStatus(forced: Bool = false) {
+
+    /// :nodoc:
+    open func updateValidationStatus(forced: Bool = false) {
         if item.isValid() {
             accessory = .valid
+            hideAlertLabel(true)
+            highlightSeparatorView(color: tintColor)
+            titleLabel.textColor = tintColor
         } else if forced || !(textField.text ?? "").isEmpty {
             accessory = .invalid
             hideAlertLabel(false)
@@ -318,6 +316,7 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
     }
     
     private func hideAlertLabel(_ hidden: Bool) {
+        guard hidden || alertLabel.text != nil else { return }
         UIView.animateKeyframes(withDuration: 0.25,
                                 delay: 0,
                                 options: [.calculationModeLinear],
@@ -331,30 +330,37 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
                                     }
                                 }, completion: { _ in
                                     self.alertLabel.isHidden = hidden
-        })
+                                })
     }
 }
 
+/// :nodoc:
 public extension FormTextItemView {
-    
+
+    /// :nodoc:
     enum AccessoryType: Equatable {
         case invalid
         case valid
         case customView(UIView)
         case none
     }
-    
+
+    /// :nodoc:
     private final class AccessoryLogo: UIImageView {
+
+        /// :nodoc:
         init(success: Bool) {
             let resource = "verification_" + success.description
-            let bundle = Bundle.internalResources
+            let bundle = Bundle.coreInternalResources
             let image = UIImage(named: resource, in: bundle, compatibleWith: nil)
             super.init(image: image)
             
             setContentHuggingPriority(.required, for: .horizontal)
             setContentCompressionResistancePriority(.required, for: .horizontal)
         }
-        
+
+        /// :nodoc:
+        @available(*, unavailable)
         required init?(coder: NSCoder) {
             fatalError("init(coder:) has not been implemented")
         }

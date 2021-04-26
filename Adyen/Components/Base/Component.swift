@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -12,6 +12,41 @@ public protocol Component: AnyObject {
     /// Defines the environment used to make networking requests.
     var environment: Environment { get set }
     
+    /// The client key that corresponds to the webservice user you will use for initiating the payment.
+    /// See https://docs.adyen.com/user-management/client-side-authentication for more information.
+    var clientKey: String? { get set }
+    
+}
+
+/// :nodoc:
+extension Component {
+
+    /// Finalizes the payment if there is any, after being proccessed by payment provider.
+    /// - Parameter success: The status of the payment.
+    /// :nodoc:
+    public func finalizeIfNeeded(with success: Bool) {
+        (self as? FinalizableComponent)?.didFinalize(with: success)
+        stopLoadingIfNeeded()
+    }
+
+    /// Called when the user cancels the component.
+    public func cancelIfNeeded() {
+        (self as? Cancellable)?.didCancel()
+        stopLoadingIfNeeded()
+    }
+
+    /// Stops any processing animation that might be running.
+    public func stopLoadingIfNeeded() {
+        (self as? LoadingComponent)?.stopLoading()
+    }
+}
+
+/// A component that needs to be aware of the result of the payment.
+public protocol FinalizableComponent: Component {
+
+    /// Finalizes payment after being proccessed by payment provider.
+    /// - Parameter success: The status of the payment.
+    func didFinalize(with success: Bool)
 }
 
 public extension Component {
@@ -25,7 +60,27 @@ public extension Component {
             return value
         }
         set {
+            var newValue = newValue
+            newValue.clientKey = clientKey
             objc_setAssociatedObject(self, &AssociatedKeys.environment, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    /// :nodoc:
+    var clientKey: String? {
+        get {
+            objc_getAssociatedObject(self, &AssociatedKeys.clientKey) as? String
+        }
+        set {
+            if let newValue = newValue, !ClientKeyValidator().isValid(newValue) {
+                let message = """
+                The key you have provided to \(String(describing: self)) is not a valid client key.
+                Check https://docs.adyen.com/user-management/client-side-authentication for more information.
+                """
+                assertionFailure(message)
+            }
+            objc_setAssociatedObject(self, &AssociatedKeys.clientKey, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            environment.clientKey = newValue
         }
     }
     
@@ -44,7 +99,10 @@ public extension Component {
     
 }
 
-private struct AssociatedKeys {
+private enum AssociatedKeys {
     internal static var isDropIn = "isDropInObject"
+
     internal static var environment = "environmentObject"
+
+    internal static var clientKey = "clientKeyObject"
 }

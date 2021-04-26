@@ -8,18 +8,18 @@ import Foundation
 
 /// An object that provides helper functions for conding and deconding responses.
 /// :nodoc:
-public final class Coder {
+public enum Coder {
     
     // MARK: - Decoding
     
     /// :nodoc:
     public static func decode<T: Decodable>(_ data: Data) throws -> T {
-        return try decoder.decode(T.self, from: data)
+        try decoder.decode(T.self, from: data)
     }
     
     /// :nodoc:
     public static func decode<T: Decodable>(_ string: String) throws -> T {
-        return try decode(Data(string.utf8))
+        try decode(Data(string.utf8))
     }
     
     /// :nodoc:
@@ -37,7 +37,7 @@ public final class Coder {
     
     /// :nodoc:
     public static func encode<T: Encodable>(_ value: T) throws -> Data {
-        return try encoder.encode(value)
+        try encoder.encode(value)
     }
     
     /// :nodoc:

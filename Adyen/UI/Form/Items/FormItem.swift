@@ -32,7 +32,7 @@ public extension FormItem {
     
     /// The flat list of all sub-items.
     var flatSubitems: [FormItem] {
-        return (self as? CompoundFormItem)?.subitems.flatMap { $0.flatSubitems } ?? [self]
+        (self as? CompoundFormItem)?.subitems.flatMap(\.flatSubitems) ?? [self]
     }
 }
 
@@ -49,3 +49,7 @@ public protocol ValidatableFormItem: FormItem {
     func isValid() -> Bool
     
 }
+
+/// A form item that requires keyboard input or otherwise custom input view.
+/// :nodoc:
+public protocol InputViewRequiringFormItem: FormItem {}

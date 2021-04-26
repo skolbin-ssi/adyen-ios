@@ -5,17 +5,18 @@
 //
 
 import Foundation
+import UIKit
 
 /// Contains the styling customization options for a list section header.
 public struct ListSectionHeaderStyle: ViewStyle {
     
     /// The title style.
-    public var title: TextStyle = TextStyle(font: .systemFont(ofSize: 13.0, weight: .medium),
-                                            color: UIColor.AdyenCore.componentSecondaryLabel,
-                                            textAlignment: .natural)
+    public var title = TextStyle(font: .preferredFont(forTextStyle: .subheadline),
+                                 color: UIColor.Adyen.componentSecondaryLabel,
+                                 textAlignment: .natural)
     
     /// :nodoc:
-    public var backgroundColor: UIColor = UIColor.AdyenCore.componentBackground
+    public var backgroundColor = UIColor.Adyen.componentBackground
     
     /// Initializes the list header style.
     ///

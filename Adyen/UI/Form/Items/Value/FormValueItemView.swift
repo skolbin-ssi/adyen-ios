@@ -29,19 +29,19 @@ open class FormValueItemView<ItemType: FormValueItem>: FormItemView<ItemType>, A
         
         addSubview(separatorView)
         configureSeparatorView()
-    }
-    
-    /// :nodoc:
-    public required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        
+        tintColor = item.style.tintColor
+        backgroundColor = item.style.backgroundColor
+
+        gestureRecognizers = [UITapGestureRecognizer(target: self, action: #selector(becomeFirstResponder))]
     }
     
     private var valueDelegate: FormValueItemViewDelegate? {
-        return delegate as? FormValueItemViewDelegate
+        delegate as? FormValueItemViewDelegate
     }
     
     /// :nodoc:
-    open override func didAddSubview(_ subview: UIView) {
+    override open func didAddSubview(_ subview: UIView) {
         super.didAddSubview(subview)
         bringSubviewToFront(separatorView)
     }
@@ -84,7 +84,7 @@ open class FormValueItemView<ItemType: FormValueItem>: FormItemView<ItemType>, A
     
     internal lazy var separatorView: UIView = {
         let separatorView = UIView()
-        separatorView.backgroundColor = UIColor.AdyenCore.componentSeparator
+        separatorView.backgroundColor = item.style.separatorColor ?? UIColor.Adyen.componentSeparator
         separatorView.isUserInteractionEnabled = false
         separatorView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -112,7 +112,7 @@ open class FormValueItemView<ItemType: FormValueItem>: FormItemView<ItemType>, A
         transitionView.frame = separatorView.frame
         addSubview(transitionView)
         
-        separatorView.backgroundColor = UIColor.AdyenCore.componentSeparator
+        separatorView.backgroundColor = item.style.separatorColor ?? UIColor.Adyen.componentSeparator
         
         UIView.animate(withDuration: 0.25, delay: 0.0, options: [.curveEaseInOut], animations: {
             transitionView.frame.size.width = 0.0

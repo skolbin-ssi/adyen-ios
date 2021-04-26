@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -30,7 +30,7 @@ public struct PaymentMethods: Decodable {
     /// - Parameter type: The type of payment method to retrieve.
     /// - Returns: The first available payment method of the given type, or `nil` if none could be found.
     public func paymentMethod<T: PaymentMethod>(ofType type: T.Type) -> T? {
-        return regular.first { $0 is T } as? T
+        regular.first { $0 is T } as? T
     }
     
     // MARK: - Decoding
@@ -38,7 +38,7 @@ public struct PaymentMethods: Decodable {
     /// :nodoc:
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.regular = try container.decode([AnyPaymentMethod].self, forKey: .regular).compactMap { $0.value }
+        self.regular = try container.decode([AnyPaymentMethod].self, forKey: .regular).compactMap(\.value)
         
         if container.contains(.stored) {
             self.stored = try container.decode([AnyPaymentMethod].self, forKey: .stored).compactMap { $0.value as? StoredPaymentMethod }
@@ -59,6 +59,7 @@ internal enum AnyPaymentMethod: Decodable {
     case storedPayPal(StoredPayPalPaymentMethod)
     case storedBCMC(StoredBCMCPaymentMethod)
     case storedRedirect(StoredRedirectPaymentMethod)
+    case storedBlik(StoredBLIKPaymentMethod)
     
     case card(AnyCardPaymentMethod)
     case issuerList(IssuerListPaymentMethod)
@@ -67,6 +68,10 @@ internal enum AnyPaymentMethod: Decodable {
     case applePay(ApplePayPaymentMethod)
     case qiwiWallet(QiwiWalletPaymentMethod)
     case weChatPay(WeChatPayPaymentMethod)
+    case mbWay(MBWayPaymentMethod)
+    case blik(BLIKPaymentMethod)
+    case giftcard(GiftCardPaymentMethod)
+    case doku(DokuPaymentMethod)
     
     case none
     
@@ -94,6 +99,16 @@ internal enum AnyPaymentMethod: Decodable {
             return paymentMethod
         case let .weChatPay(paymentMethod):
             return paymentMethod
+        case let .mbWay(paymentMethod):
+            return paymentMethod
+        case let .blik(paymentMethod):
+            return paymentMethod
+        case let .storedBlik(paymentMethod):
+            return paymentMethod
+        case let .doku(paymentMethod):
+            return paymentMethod
+        case let .giftcard(paymentMethod):
+            return paymentMethod
         case .none:
             return nil
         }
@@ -109,5 +124,6 @@ internal enum AnyPaymentMethod: Decodable {
         case type
         case details
         case brand
+        case issuers
     }
 }

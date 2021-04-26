@@ -5,6 +5,7 @@
 //
 
 import Foundation
+import UIKit
 
 /// :nodoc:
 public final class ContainerView: UIView {
@@ -23,6 +24,7 @@ public final class ContainerView: UIView {
         setupConstraints()
     }
     
+    @available(*, unavailable)
     internal required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

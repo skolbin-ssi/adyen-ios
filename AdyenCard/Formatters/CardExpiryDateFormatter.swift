@@ -4,6 +4,7 @@
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
+import Adyen
 import Foundation
 
 /// Formats a card's expiration date for display.
@@ -11,7 +12,7 @@ import Foundation
 public final class CardExpiryDateFormatter: NumericFormatter {
     
     /// :nodoc:
-    public override func formattedValue(for value: String) -> String {
+    override public func formattedValue(for value: String) -> String {
         let separator = " / "
         
         let sanitizedString = sanitizedValue(for: value).truncate(to: maxLength)

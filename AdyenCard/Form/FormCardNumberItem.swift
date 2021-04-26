@@ -4,22 +4,25 @@
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
-/// Describes the methods for managing card type change.
-internal protocol CardTypeChangeDelegate: class {
-    func cardTypeDidChange(type: CardType?)
-}
+import Adyen
+import UIKit
 
 /// A form item into which a card number is entered.
 internal final class FormCardNumberItem: FormTextItem {
     
+    private static let binLength = 12
+
+    private let cardNumberFormatter = CardNumberFormatter()
+
     /// The supported card types.
     internal let supportedCardTypes: [CardType]
     
     /// The card type logos displayed in the form item.
     internal let cardTypeLogos: [CardTypeLogo]
     
-    /// The delegate for managing card type change
-    internal weak var delegate: CardTypeChangeDelegate?
+    /// The observable of the card's BIN value.
+    /// The value contains up to 6 first digits of card' PAN.
+    @Observable("") internal var binValue: String
     
     /// :nodoc:
     private let localizationParameters: LocalizationParameters?
@@ -31,8 +34,10 @@ internal final class FormCardNumberItem: FormTextItem {
                   localizationParameters: LocalizationParameters? = nil) {
         self.supportedCardTypes = supportedCardTypes
         
-        let logoURLs = supportedCardTypes.map { LogoURLProvider.logoURL(withName: $0.rawValue, environment: environment) }
-        self.cardTypeLogos = logoURLs.map(CardTypeLogo.init)
+        self.cardTypeLogos = supportedCardTypes.map {
+            CardTypeLogo(url: LogoURLProvider.logoURL(withName: $0.rawValue, environment: environment),
+                         type: $0)
+        }
         self.localizationParameters = localizationParameters
         
         self.style = style
@@ -48,14 +53,8 @@ internal final class FormCardNumberItem: FormTextItem {
     // MARK: - Value
     
     internal func valueDidChange() {
-        let detectedCardTypes = cardTypeDetector.types(forCardNumber: value)
-        for (cardType, logo) in zip(supportedCardTypes, cardTypeLogos) {
-            let isVisible = value.isEmpty || detectedCardTypes.contains(cardType)
-            logo.isHidden.value = !isVisible
-        }
-        
-        cardNumberFormatter.cardType = detectedCardTypes.first
-        delegate?.cardTypeDidChange(type: detectedCardTypes.count > 1 ? nil : detectedCardTypes.first)
+        binValue = String(value.prefix(FormCardNumberItem.binLength))
+        cardNumberFormatter.cardType = supportedCardTypes.adyen.type(forCardNumber: value)
     }
     
     // MARK: - BuildableFormItem
@@ -64,16 +63,15 @@ internal final class FormCardNumberItem: FormTextItem {
         builder.build(with: self)
     }
     
-    // MARK: - Private
-    
-    private let cardNumberFormatter = CardNumberFormatter()
-    
-    private lazy var cardTypeDetector: CardTypeDetector = {
-        let cardTypeDetector = CardTypeDetector()
-        cardTypeDetector.detectableTypes = supportedCardTypes
-        
-        return cardTypeDetector
-    }()
+    /// Show logos of the card types if those types are supported.
+    /// - Parameter detectedCards: List of card types to show.
+    internal func showLogos(for cardTypes: [CardType]) {
+        let detectedCards = Set<CardType>(cardTypes)
+        for logo in self.cardTypeLogos {
+            let isVisible = detectedCards.contains(logo.type)
+            logo.isHidden = !isVisible
+        }
+    }
     
 }
 
@@ -81,18 +79,21 @@ extension FormCardNumberItem {
     
     /// Describes a card type logo shown in the card number form item.
     internal final class CardTypeLogo {
+
+        internal let type: CardType
         
         /// The URL of the card type logo.
         internal let url: URL
         
         /// Indicates if the card type logo should be hidden.
-        internal let isHidden = Observable(false)
+        @Observable(false) internal var isHidden: Bool
         
         /// Initializes the card type logo.
         ///
         /// - Parameter cardType: The card type for which to initialize the logo.
-        internal init(url: URL) {
+        internal init(url: URL, type: CardType) {
             self.url = url
+            self.type = type
         }
         
     }

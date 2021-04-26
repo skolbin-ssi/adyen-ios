@@ -16,13 +16,15 @@ public struct QiwiWalletPaymentMethod: PaymentMethod {
     public let name: String
     
     /// Qiwi Wallet details.
-    internal let phoneExtensions: [PhoneExtension]
+    /// :nodoc:
+    public let phoneExtensions: [PhoneExtension]
     
     /// Initializes the Qiwi Wallet payment method.
     ///
     /// - Parameter type: The payment method type.
     /// - Parameter name: The payment method name.
     /// - Parameter phoneExtensions: The phone extensions supported.
+    /// :nodoc:
     internal init(type: String, name: String, phoneExtensions: [PhoneExtension] = []) {
         self.type = type
         self.name = name
@@ -36,21 +38,22 @@ public struct QiwiWalletPaymentMethod: PaymentMethod {
         self.name = try container.decode(String.self, forKey: .name)
         
         var phoneExtensions: [PhoneExtension]?
-        var detailsContainer = try container.nestedUnkeyedContainer(forKey: .details)
-        while !detailsContainer.isAtEnd {
-            let detailContainer = try detailsContainer.nestedContainer(keyedBy: CodingKeys.self)
-            let detailKey = try detailContainer.decode(String.self, forKey: .key)
-            guard detailKey == "qiwiwallet.telephoneNumberPrefix" else { continue }
-            
-            phoneExtensions = try detailContainer.decode([PhoneExtension].self, forKey: .items)
+        if var detailsContainer = try? container.nestedUnkeyedContainer(forKey: .details) {
+            while !detailsContainer.isAtEnd {
+                let detailContainer = try detailsContainer.nestedContainer(keyedBy: CodingKeys.self)
+                let detailKey = try detailContainer.decode(String.self, forKey: .key)
+                guard detailKey == "qiwiwallet.telephoneNumberPrefix" else { continue }
+
+                phoneExtensions = try detailContainer.decode([PhoneExtension].self, forKey: .items)
+            }
         }
         
-        self.phoneExtensions = phoneExtensions ?? []
+        self.phoneExtensions = phoneExtensions ?? PhoneExtensionsRepository.get(with: PhoneExtensionsQuery(paymentMethod: .qiwiWallet))
     }
     
     /// :nodoc:
     public func buildComponent(using builder: PaymentComponentBuilder) -> PaymentComponent? {
-        return builder.build(paymentMethod: self)
+        builder.build(paymentMethod: self)
     }
     
     private enum CodingKeys: String, CodingKey {
@@ -63,19 +66,30 @@ public struct QiwiWalletPaymentMethod: PaymentMethod {
 }
 
 /// Describes a country phone extension.
-internal struct PhoneExtension: Decodable, Equatable {
+/// :nodoc:
+public struct PhoneExtension: Decodable, Equatable {
     
     /// The phone extension.
-    internal let value: String
+    /// :nodoc:
+    public let value: String
     
     /// The ISO country code.
-    internal let countryCode: String
+    /// :nodoc:
+    public let countryCode: String
     
     /// The full country name.
-    internal var countryDisplayName: String {
+    /// :nodoc:
+    public var countryDisplayName: String {
         Locale.current.localizedString(forRegionCode: countryCode) ?? ""
     }
-    
+
+    /// :nodoc:
+    public init(value: String, countryCode: String) {
+        self.value = value
+        self.countryCode = countryCode
+    }
+
+    /// :nodoc:
     private enum CodingKeys: String, CodingKey {
         case value = "id"
         case countryCode = "name"

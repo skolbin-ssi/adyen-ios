@@ -4,6 +4,7 @@
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
+import Adyen
 import Foundation
 
 /// Validates a card's number.
@@ -23,7 +24,7 @@ public final class CardNumberValidator: Validator {
     
     /// :nodoc:
     public func maximumLength(for value: String) -> Int {
-        return 19
+        19
     }
     
     // MARK: - Private

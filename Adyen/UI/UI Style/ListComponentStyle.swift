@@ -5,18 +5,19 @@
 //
 
 import Foundation
+import UIKit
 
 /// Contains the styling customization options for any list-based component.
 public struct ListComponentStyle: ViewStyle {
     
     /// The style of any of the items in the list.
-    public var listItem: ListItemStyle = ListItemStyle()
+    public var listItem = ListItemStyle()
     
     /// The style of any of the section headers in the list.
-    public var sectionHeader: ListSectionHeaderStyle = ListSectionHeaderStyle()
+    public var sectionHeader = ListSectionHeaderStyle()
     
     /// :nodoc:
-    public var backgroundColor: UIColor = UIColor.AdyenCore.componentBackground
+    public var backgroundColor = UIColor.Adyen.componentBackground
     
     /// Initializes the list component style.
     ///

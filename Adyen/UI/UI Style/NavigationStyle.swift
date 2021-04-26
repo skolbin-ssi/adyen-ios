@@ -5,26 +5,58 @@
 //
 
 import Foundation
+import UIKit
+
+/// The style of "Cancel" button.
+public enum CancelButtonStyle {
+
+    /// Default system style. Cross icon for iOS 13, system button "Cancel" for prior versions.
+    case system
+
+    /// System button "Cancel".
+    case legacy
+
+    /// Custom button with image.
+    case custom(UIImage)
+}
+
+/// Modes for toolbar layout.
+public enum ToolbarMode {
+
+    /// Cancel button visially left aligned.
+    case leftCancel
+
+    /// Cancel button visially right aligned.
+    case rightCancel
+
+}
 
 /// Indicates the navigation level style.
-public struct NavigationStyle: ViewStyle {
+public struct NavigationStyle: TintableStyle {
     
     /// Indicates the navigation bar background color.
-    public var barBackgroundColor: UIColor = UIColor.AdyenCore.componentBackground
+    public var backgroundColor = UIColor.Adyen.componentBackground
+    
+    /// The color of the thin line at the bottom of the navigation bar.
+    /// If value is nil, the default color would be used.
+    public var separatorColor: UIColor?
     
     /// Indicates the navigation bar tint color.
-    public var barTintColor: UIColor = UIColor.AdyenCore.defaultBlue
+    public var tintColor: UIColor?
+    
+    /// Indicates the corner radius of navigation bar top corners.
+    public var cornerRadius: CGFloat = 10
     
     /// Indicates the bar title text style.
-    public var barTitle: TextStyle = TextStyle(font: .systemFont(ofSize: 20, weight: .semibold),
-                                               color: UIColor.AdyenCore.componentLabel,
-                                               textAlignment: .natural)
-    
-    /// Indicates the navigation level tint color.
-    public var tintColor: UIColor = UIColor.AdyenCore.defaultBlue
-    
-    /// :nodoc:
-    public var backgroundColor: UIColor = UIColor.AdyenCore.componentBackground
+    public var barTitle = TextStyle(font: UIFont.AdyenCore.barTitle,
+                                    color: UIColor.Adyen.componentLabel,
+                                    textAlignment: .natural)
+
+    /// The style of cancelButton. This property is not applicable to SFViewController in redirect component.
+    public var cancelButton = CancelButtonStyle.system
+
+    /// The mode for toolbar layout. Defines positions cancel button.
+    public var toolbarMode = ToolbarMode.rightCancel
     
     /// Initializes the navigation style.
     public init() {}

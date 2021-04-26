@@ -15,25 +15,52 @@ custom_categories:
     children:
       - DropInComponent
       - DropInComponentDelegate
-      - DropInActionComponent
   - name: Card Component
     children:
       - CardComponent
       - CardDetails
       - CardEncryptor
       - CardType
-      - CardTypeDetector
       - CardExpiryDateFormatter
       - CardExpiryDateValidator
       - CardSecurityCodeFormatter
       - CardSecurityCodeValidator
       - CardNumberFormatter
       - CardNumberValidator
+      - CardComponentDelegate
+      - StoredCardConfiguration
+      - CardBrand
   - name: Qiwi Wallet Component
     children:
       - QiwiWalletComponent
       - QiwiWalletDetails
       - QiwiWalletPaymentMethod
+  - name: MB Way Component
+    children:
+      - MBWayComponent
+      - MBWayDetails
+      - MBWayPaymentMethod
+  - name: BLIK Component
+    children:
+      - BLIKComponent
+      - BLIKDetails
+      - BLIKPaymentMethod
+      - StoredBLIKPaymentMethod
+  - name: Await Action Component
+    children:
+      - AwaitComponent
+      - AwaitActionDetails
+      - AwaitPaymentMethod
+  - name: Doku Component
+    children:
+      - DokuComponent
+      - DokuDetails
+      - DokuPaymentMethod
+  - name: Voucher Action Component
+    children:
+      - VoucherComponent
+      - VoucherAction
+      - VoucherPaymentMethod
   - name: WeChat Pay
     children:
       - WeChatPaySDKActionComponent
@@ -74,6 +101,9 @@ custom_categories:
       - EntercashDetails
       - OpenBankingComponent
       - OpenBankingDetails
+  - name: Adyen Action Component
+    children:
+      - AdyenActionComponent
   - name: Redirect Component
     children:
       - RedirectComponent
@@ -82,8 +112,12 @@ custom_categories:
     children:
       - Component
       - PaymentComponent
+      - FinalizableComponent
+      - PaymentAwareComponent
+      - TrackableComponent
       - PaymentComponentData
       - PaymentComponentDelegate
+      - PresentationDelegate
       - ActionComponent
       - ActionComponentData
       - ActionComponentDelegate
@@ -92,6 +126,8 @@ custom_categories:
       - PaymentMethodDetails
       - AdditionalDetails
       - ComponentError
+      - SecuredViewController
+      - Localizable
   - name: Models
     children:
       - PaymentMethods
@@ -100,6 +136,7 @@ custom_categories:
       - StoredCardPaymentMethod
       - StoredBCMCPaymentMethod
       - StoredPayPalPaymentMethod
+      - StoredBLIKPaymentMethod
       - AnyCardPaymentMethod
       - CardPaymentMethod
       - IssuerListPaymentMethod
@@ -111,8 +148,15 @@ custom_categories:
       - Payment
       - Action
       - RedirectAction
+      - GenericVoucherAction
+      - ThreeDS2Action
+      - SDKAction
       - ThreeDS2FingerprintAction
       - ThreeDS2ChallengeAction
+      - AwaitAction
+      - CardFundingSource
+      - BrowserInfo
+      - LocalizationParameters
   - name: Styling
     children:
       - FormComponentStyle
@@ -120,15 +164,22 @@ custom_categories:
       - FormFooterStyle
       - FormTextItemStyle
       - FormSwitchItemStyle
+      - FormButtonItemStyle
       - ListComponentStyle
       - ListSectionHeaderStyle
       - ListItemStyle
+      - AwaitComponentStyle
       - RedirectComponentStyle
+      - VoucherComponentStyle
       - NavigationStyle
+      - ToolbarMode
       - ButtonStyle
+      - CancelButtonStyle
       - ImageStyle
       - TextStyle
       - ViewStyle
+      - TintableStyle
+      - CornerRounding
   - name: Other
     children:
       - AdyenLogging
@@ -137,5 +188,8 @@ custom_categories:
       - LengthValidator
       - Environment
       - LogoURLProvider
-      - Localizable
-      - LocalizationParameters
+  - name: Encryption
+    children:
+      - CardEncryptor
+      - Card
+      - EncryptedCard

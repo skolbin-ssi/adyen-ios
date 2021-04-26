@@ -23,20 +23,12 @@ public final class FormSwitchItemView: FormValueItemView<FormSwitchItem> {
         accessibilityTraits = switchControl.accessibilityTraits
         accessibilityValue = switchControl.accessibilityValue
         
-        backgroundColor = item.style.backgroundColor
-        
         addSubview(stackView)
-        
-        configureConstraints()
+        stackView.adyen.anchore(inside: self.layoutMarginsGuide)
     }
     
     private var switchDelegate: FormValueItemViewDelegate? {
-        return delegate as? FormValueItemViewDelegate
-    }
-    
-    /// :nodoc:
-    public required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        delegate as? FormValueItemViewDelegate
     }
     
     // MARK: - Title Label
@@ -44,6 +36,7 @@ public final class FormSwitchItemView: FormValueItemView<FormSwitchItem> {
     private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.font = item.style.title.font
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textColor = item.style.title.color
         titleLabel.textAlignment = item.style.title.textAlignment
         titleLabel.backgroundColor = item.style.title.backgroundColor
@@ -60,9 +53,11 @@ public final class FormSwitchItemView: FormValueItemView<FormSwitchItem> {
     private lazy var switchControl: UISwitch = {
         let switchControl = UISwitch()
         switchControl.isOn = item.value
+        switchControl.onTintColor = item.style.tintColor
         switchControl.isAccessibilityElement = false
         switchControl.addTarget(self, action: #selector(switchControlValueChanged), for: .valueChanged)
         switchControl.setContentHuggingPriority(.required, for: .horizontal)
+        switchControl.accessibilityIdentifier = item.identifier.map { ViewIdentifierBuilder.build(scopeInstance: $0, postfix: "switch") }
         
         return switchControl
     }()
@@ -75,7 +70,7 @@ public final class FormSwitchItemView: FormValueItemView<FormSwitchItem> {
     }
     
     /// :nodoc:
-    public override func accessibilityActivate() -> Bool {
+    override public func accessibilityActivate() -> Bool {
         switchControl.isOn = !switchControl.isOn
         switchControlValueChanged()
         
@@ -94,18 +89,5 @@ public final class FormSwitchItemView: FormValueItemView<FormSwitchItem> {
         
         return stackView
     }()
-    
-    // MARK: - Layout
-    
-    private func configureConstraints() {
-        let constraints = [
-            stackView.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor),
-            stackView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
-            stackView.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor)
-        ]
-        
-        NSLayoutConstraint.activate(constraints)
-    }
-    
+
 }

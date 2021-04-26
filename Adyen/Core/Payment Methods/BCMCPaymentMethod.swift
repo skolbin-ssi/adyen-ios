@@ -18,8 +18,13 @@ public struct BCMCPaymentMethod: AnyCardPaymentMethod {
     /// In this case the brands is ["bcmc"].
     public let brands: [String] = [PaymentMethodType.bcmc.rawValue]
     
+    /// :nodoc:
+    public var fundingSource: CardFundingSource? { cardPaymentMethod.fundingSource }
+    
+    /// :nodoc:
     private let cardPaymentMethod: CardPaymentMethod
     
+    /// :nodoc:
     internal init(cardPaymentMethod: CardPaymentMethod) {
         self.cardPaymentMethod = cardPaymentMethod
     }
@@ -32,7 +37,7 @@ public struct BCMCPaymentMethod: AnyCardPaymentMethod {
     
     /// :nodoc:
     public func buildComponent(using builder: PaymentComponentBuilder) -> PaymentComponent? {
-        return builder.build(paymentMethod: self)
+        builder.build(paymentMethod: self)
     }
     
 }

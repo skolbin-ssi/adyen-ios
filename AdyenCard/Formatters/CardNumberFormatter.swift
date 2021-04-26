@@ -4,6 +4,7 @@
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
+import Adyen
 import Foundation
 
 /// Formats a card's number for display.
@@ -14,7 +15,7 @@ public final class CardNumberFormatter: NumericFormatter {
     public var cardType: CardType?
     
     /// :nodoc:
-    public override func formattedValue(for value: String) -> String {
+    override public func formattedValue(for value: String) -> String {
         let sanitizedCardNumber = sanitizedValue(for: value)
         let formattedCardNumberComponents = sanitizedCardNumber.components(withLengths: cardFormatGrouping)
         return formattedCardNumberComponents.joined(separator: " ")

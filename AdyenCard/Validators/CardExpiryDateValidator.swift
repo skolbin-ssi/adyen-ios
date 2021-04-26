@@ -4,6 +4,7 @@
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
+import Adyen
 import Foundation
 
 /// Validates a card's expiration date.
@@ -12,6 +13,8 @@ import Foundation
 public final class CardExpiryDateValidator: Validator {
     
     private let referenceDate: Date
+    
+    private static let maxYearsDifference: Int = 30
     
     /// :nodoc:
     public init() {
@@ -38,7 +41,7 @@ public final class CardExpiryDateValidator: Validator {
         let monthDiff = diffComponents.month ?? 0
         let yearDiff = diffComponents.year ?? 0
         
-        guard (0...15).contains(yearDiff), monthDiff >= -3 else { return false }
+        guard (0...Self.maxYearsDifference).contains(yearDiff), monthDiff >= -3 else { return false }
         
         return true
     }
@@ -59,7 +62,7 @@ public final class CardExpiryDateValidator: Validator {
     
     /// :nodoc:
     public func maximumLength(for value: String) -> Int {
-        return 4
+        4
     }
     
 }

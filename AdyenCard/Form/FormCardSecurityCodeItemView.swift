@@ -1,32 +1,31 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
+import Adyen
+import UIKit
+
 /// A view representing a form card security code item.
 internal final class FormCardSecurityCodeItemView: FormTextItemView<FormCardSecurityCodeItem>, Observer {
-    
-    private static let fourDigitHint = "1234"
-    private static let threeDigitHint = "123"
     
     internal required init(item: FormCardSecurityCodeItem) {
         super.init(item: item)
         accessory = .customView(cardHintView)
-        textField.placeholder = FormCardSecurityCodeItemView.threeDigitHint
-        observe(item.selectedCard, eventHandler: { [weak self] card in
-            // TODO: replace with actual translated values
-            // let localizationKey = "creditCard.cvcField.placeholder.\(isAmex ? "4" : "3")digits"
-            // textField.placeholder = ADYLocalizedString(localizationKey, localizationParameters)
-            let hintText = card == CardType.americanExpress ?
-                FormCardSecurityCodeItemView.fourDigitHint :
-                FormCardSecurityCodeItemView.threeDigitHint
-            self?.textField.placeholder = hintText
-        })
-    }
-    
-    internal required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        observe(item.$selectedCard) { [weak self] cardsType in
+            let number = cardsType == CardType.americanExpress ? "4" : "3"
+            let localization = ADYLocalizedString("adyen.card.cvcItem.placeholder.digits", item.localizationParameters)
+            self?.textField.placeholder = String(format: localization, number)
+        }
+
+        bind(item.$title, to: self.titleLabel, at: \.text)
+
+        observe(item.$isCVCOptional) { [weak self] _ in
+            self?.updateValidationStatus()
+        }
+        
+        item.$selectedCard.publish(nil)
     }
     
     private lazy var cardHintView: HintView = {
@@ -34,14 +33,22 @@ internal final class FormCardSecurityCodeItemView: FormTextItemView<FormCardSecu
         view.accessibilityIdentifier = ViewIdentifierBuilder.build(scopeInstance: self, postfix: "cvvHintIcon")
         return view
     }()
+
+    override internal func updateValidationStatus(forced: Bool = false) {
+        super.updateValidationStatus(forced: forced)
+
+        if item.isCVCOptional {
+            accessory = .customView(cardHintView)
+        }
+    }
     
-    internal override func textFieldDidBeginEditing(_ text: UITextField) {
+    override internal func textFieldDidBeginEditing(_ text: UITextField) {
         super.textFieldDidBeginEditing(text)
         accessory = .customView(cardHintView)
         cardHintView.isHighlighted = true
     }
     
-    internal override func textFieldDidEndEditing(_ text: UITextField) {
+    override internal func textFieldDidEndEditing(_ text: UITextField) {
         super.textFieldDidEndEditing(text)
         cardHintView.isHighlighted = false
     }
@@ -52,7 +59,7 @@ extension FormCardSecurityCodeItemView {
     
     internal class HintView: UIImageView, Observer {
         
-        private lazy var bundle = Bundle(for: type(of: self))
+        private lazy var bundle = Bundle.cardInternalResources
         private let minimumAlpha: CGFloat = 0.3
         private let blinkDuration = 1.0
         
@@ -71,15 +78,16 @@ extension FormCardSecurityCodeItemView {
             image = UIImage(named: logoResource, in: self.bundle, compatibleWith: nil)
             translatesAutoresizingMaskIntoConstraints = false
             setupConstrints()
-            observe(item.selectedCard) { [weak self] cardType in self?.flipCard(toFront: cardType == CardType.americanExpress) }
+            observe(item.$selectedCard) { [weak self] cardType in self?.flipCard(toFront: cardType == CardType.americanExpress) }
         }
         
+        @available(*, unavailable)
         internal required init?(coder: NSCoder) {
             fatalError("init(coder:) has not been implemented")
         }
         
         /// Indicate when user focused on security code field
-        internal override var isHighlighted: Bool {
+        override internal var isHighlighted: Bool {
             didSet {
                 if isHighlighted {
                     animateHint()
@@ -111,15 +119,16 @@ extension FormCardSecurityCodeItemView {
                            completion: nil)
         }
         
+        override public var accessibilityIdentifier: String? {
+            didSet {
+                hintImage.accessibilityIdentifier = ViewIdentifierBuilder.build(scopeInstance: self, postfix: "imageView")
+            }
+        }
+        
         private func setupConstrints() {
             addSubview(hintImage)
             setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-            NSLayoutConstraint.activate([
-                hintImage.topAnchor.constraint(equalTo: topAnchor),
-                hintImage.bottomAnchor.constraint(equalTo: bottomAnchor),
-                hintImage.leftAnchor.constraint(equalTo: leftAnchor),
-                hintImage.rightAnchor.constraint(equalTo: rightAnchor)
-            ])
+            hintImage.adyen.anchore(inside: self)
         }
         
         private lazy var hintImage: UIImageView = {

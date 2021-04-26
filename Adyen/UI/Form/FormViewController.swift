@@ -1,19 +1,41 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
 import UIKit
 
+/// :nodoc:
+/// Delegate to handle different viewController events.
+public protocol ViewControllerDelegate: AnyObject {
+    
+    /// :nodoc:
+    /// Handles the UIViewController.viewDidLoad() event.
+    func viewDidLoad(viewController: UIViewController)
+
+    /// :nodoc:
+    /// Handles the UIViewController.viewDidAppear() event.
+    func viewDidAppear(viewController: UIViewController)
+    
+}
+
 /// Displays a form for the user to enter details.
 /// :nodoc:
+@objc(ADYFormViewController)
 public final class FormViewController: UIViewController, Localizable {
     
     private lazy var itemManager = FormViewItemManager(itemViewDelegate: self)
     
+    /// :nodoc:
+    public var requiresKeyboardInput: Bool { formRequiresInputView() }
+    
     /// Indicates the `FormViewController` UI styling.
     public let style: ViewStyle
+    
+    /// :nodoc:
+    /// Delegate to handle different viewController events.
+    public weak var delegate: ViewControllerDelegate?
     
     /// Initializes the FormViewController.
     ///
@@ -23,6 +45,7 @@ public final class FormViewController: UIViewController, Localizable {
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     internal required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -30,8 +53,8 @@ public final class FormViewController: UIViewController, Localizable {
     // MARK: - Public
     
     /// :nodoc:
-    public override var preferredContentSize: CGSize {
-        get { formView.preferredContentSize }
+    override public var preferredContentSize: CGSize {
+        get { formView.intrinsicContentSize }
         
         // swiftlint:disable:next unused_setter_value
         set { assertionFailure("""
@@ -45,7 +68,7 @@ public final class FormViewController: UIViewController, Localizable {
     
     /// The items displayed in the form.
     public var items: [FormItem] {
-        return itemManager.items
+        itemManager.items
     }
     
     /// Appends an item to the form.
@@ -87,17 +110,28 @@ public final class FormViewController: UIViewController, Localizable {
     }
     
     private func getAllValidatableItems() -> [ValidatableFormItem] {
-        let flatItems = itemManager.items.flatMap { $0.flatSubitems }
+        let flatItems = getAllFlatItems()
         return flatItems.compactMap { $0 as? ValidatableFormItem }
+    }
+    
+    private func formRequiresInputView() -> Bool {
+        let flatItems = getAllFlatItems()
+        return flatItems.contains { $0 is InputViewRequiringFormItem }
+    }
+    
+    private func getAllFlatItems() -> [FormItem] {
+        itemManager.items.flatMap(\.flatSubitems)
     }
     
     // MARK: - View
     
     /// :nodoc:
-    public override func viewDidLoad() {
+    override public func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(formView)
         setupConstraints()
+        
+        delegate?.viewDidLoad(viewController: self)
         
         itemManager.itemViews.forEach(formView.appendItemView(_:))
         
@@ -112,9 +146,10 @@ public final class FormViewController: UIViewController, Localizable {
     }
     
     /// :nodoc:
-    public override func viewDidAppear(_ animated: Bool) {
+    override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         assignInitialFirstResponder()
+        delegate?.viewDidAppear(viewController: self)
     }
     
     private lazy var formView: FormView = {
@@ -126,26 +161,34 @@ public final class FormViewController: UIViewController, Localizable {
     private var bottomConstraint: NSLayoutConstraint?
     
     private func setupConstraints() {
-        bottomConstraint = formView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+
+        let constraints: [NSLayoutConstraint?]
         if #available(iOS 11.0, *) {
             bottomConstraint = formView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            constraints = [
+                formView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                bottomConstraint,
+                formView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
+                formView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor)
+            ]
+        } else {
+            bottomConstraint = formView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            constraints = [
+                formView.topAnchor.constraint(equalTo: view.topAnchor),
+                bottomConstraint,
+                formView.leftAnchor.constraint(equalTo: view.leftAnchor),
+                formView.rightAnchor.constraint(equalTo: view.rightAnchor)
+            ]
         }
         
         bottomConstraint?.priority = .defaultHigh
-        let constraints = [
-            formView.topAnchor.constraint(equalTo: view.topAnchor),
-            bottomConstraint,
-            formView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            formView.rightAnchor.constraint(equalTo: view.rightAnchor)
-        ]
-        
         NSLayoutConstraint.activate(constraints.compactMap { $0 })
     }
     
     // MARK: - Keyboard
     
     @discardableResult
-    public override func resignFirstResponder() -> Bool {
+    override public func resignFirstResponder() -> Bool {
         let textItemView = itemManager.allItemViews.first(where: { $0.isFirstResponder })
         textItemView?.resignFirstResponder()
         

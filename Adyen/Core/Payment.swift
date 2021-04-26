@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -10,7 +10,7 @@ import Foundation
 public struct Payment {
     
     /// Describes the amount of a payment.
-    public struct Amount {
+    public struct Amount: Codable {
         
         /// The value of the amount in minor units.
         public var value: Int
@@ -28,6 +28,20 @@ public struct Payment {
             self.currencyCode = currencyCode
         }
         
+        /// Initializes an Amount from a `Decimal` value expressed in major units.
+        ///
+        /// - Parameters:
+        ///   - value: The value in major units.
+        ///   - currencyCode: The code of the currency.
+        public init(value: Decimal, currencyCode: String) {
+            self.value = AmountFormatter.minorUnitAmount(from: value, currencyCode: currencyCode)
+            self.currencyCode = currencyCode
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case currencyCode = "currency"
+            case value
+        }
     }
     
     /// The amount for this payment.

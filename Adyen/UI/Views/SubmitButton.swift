@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -27,14 +27,13 @@ public final class SubmitButton: UIControl {
         addSubview(activityIndicatorView)
         addSubview(titleLabel)
         
-        layer.cornerRadius = style.cornerRadius
-        
         backgroundColor = style.backgroundColor
         
         configureConstraints()
     }
     
     /// :nodoc:
+    @available(*, unavailable)
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -42,8 +41,10 @@ public final class SubmitButton: UIControl {
     // MARK: - Background View
     
     private lazy var backgroundView: BackgroundView = {
-        let backgroundView = BackgroundView(cornerRadius: style.cornerRadius, color: style.backgroundColor)
-        backgroundView.backgroundColor = style.backgroundColor
+        let backgroundView = BackgroundView(cornerRounding: style.cornerRounding,
+                                            borderColor: style.borderColor,
+                                            borderWidth: style.borderWidth,
+                                            color: style.backgroundColor)
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         
         return backgroundView
@@ -62,6 +63,7 @@ public final class SubmitButton: UIControl {
     private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.font = style.title.font
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textColor = style.title.color
         titleLabel.backgroundColor = style.title.backgroundColor
         titleLabel.textAlignment = style.title.textAlignment
@@ -72,7 +74,7 @@ public final class SubmitButton: UIControl {
     }()
     
     /// :nodoc:
-    public override var accessibilityIdentifier: String? {
+    override public var accessibilityIdentifier: String? {
         didSet {
             titleLabel.accessibilityIdentifier = accessibilityIdentifier.map {
                 ViewIdentifierBuilder.build(scopeInstance: $0, postfix: "titleLabel")
@@ -85,7 +87,7 @@ public final class SubmitButton: UIControl {
     /// Boolean value indicating whether an activity indicator should be shown.
     public var showsActivityIndicator: Bool {
         get {
-            return activityIndicatorView.isAnimating
+            activityIndicatorView.isAnimating
         }
         
         set {
@@ -112,13 +114,15 @@ public final class SubmitButton: UIControl {
     
     // MARK: - Layout
     
+    override public func layoutSubviews() {
+        super.layoutSubviews()
+        self.adyen.round(corners: .allCorners, rounding: style.cornerRounding)
+    }
+    
     private func configureConstraints() {
+        backgroundView.adyen.anchore(inside: self)
+        
         let constraints = [
-            backgroundView.topAnchor.constraint(equalTo: topAnchor),
-            backgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            backgroundView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            backgroundView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
             activityIndicatorView.centerXAnchor.constraint(equalTo: centerXAnchor),
             activityIndicatorView.centerYAnchor.constraint(equalTo: centerYAnchor),
             
@@ -138,7 +142,7 @@ public final class SubmitButton: UIControl {
     // MARK: - State
     
     /// :nodoc:
-    public override var isHighlighted: Bool {
+    override public var isHighlighted: Bool {
         didSet {
             backgroundView.isHighlighted = isHighlighted
         }
@@ -146,23 +150,29 @@ public final class SubmitButton: UIControl {
     
 }
 
-private extension SubmitButton {
+extension SubmitButton {
     
-    class BackgroundView: UIView {
+    private class BackgroundView: UIView {
         
         private let color: UIColor
+        private let rounding: CornerRounding
         
-        fileprivate init(cornerRadius: CGFloat, color: UIColor) {
+        fileprivate init(cornerRounding: CornerRounding,
+                         borderColor: UIColor?,
+                         borderWidth: CGFloat, color: UIColor) {
             self.color = color
+            self.rounding = cornerRounding
             super.init(frame: .zero)
             
             backgroundColor = color
+            layer.borderColor = borderColor?.cgColor
+            layer.borderWidth = borderWidth
             isUserInteractionEnabled = false
             
-            layer.cornerRadius = cornerRadius
             layer.masksToBounds = true
         }
         
+        @available(*, unavailable)
         fileprivate required init?(coder aDecoder: NSCoder) {
             fatalError("init(coder:) has not been implemented")
         }
@@ -194,6 +204,11 @@ private extension SubmitButton {
             transition.duration = 0.2
             transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             layer.add(transition, forKey: nil)
+        }
+        
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            self.adyen.round(corners: .allCorners, rounding: rounding)
         }
         
     }

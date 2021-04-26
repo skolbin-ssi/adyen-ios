@@ -29,14 +29,9 @@ private struct LocalizationInput {
 ///   - arguments: The arguments to substitute in the templated localized string.
 /// - Returns: The localized string for the given key, or the key itself if the localized string could not be found.
 public func ADYLocalizedString(_ key: String, _ parameters: LocalizationParameters?, _ arguments: CVarArg...) -> String {
-    
-    var result = fallbackLocalizedString(key: key)
-    
     let possibleInputs = buildPossibleInputs(key, parameters)
-    
-    if let localizedString = attempt(possibleInputs) {
-        result = localizedString
-    }
+
+    let result = attempt(possibleInputs) ?? fallbackLocalizedString(key: key)
     
     guard !arguments.isEmpty else {
         return result
@@ -46,17 +41,31 @@ public func ADYLocalizedString(_ key: String, _ parameters: LocalizationParamete
 }
 
 private func fallbackLocalizedString(key: String) -> String {
-    return NSLocalizedString(key, tableName: nil, bundle: Bundle.internalResources, comment: "")
+    NSLocalizedString(key, tableName: nil, bundle: Bundle.coreInternalResources, comment: "")
 }
 
-private func buildPossibleInputs(_ key: String, _ parameters: LocalizationParameters?) -> [LocalizationInput] {
+private func buildPossibleInputs(_ key: String,
+                                 _ parameters: LocalizationParameters?) -> [LocalizationInput] {
+    var possibleInputs = buildPossibleInputs(for: Bundle.main, key, parameters)
+
+    if let customBundle = parameters?.bundle {
+        let inputs = buildPossibleInputs(for: customBundle, key, parameters)
+        possibleInputs.append(contentsOf: inputs)
+    }
+
+    return possibleInputs
+}
+
+private func buildPossibleInputs(for bundle: Bundle,
+                                 _ key: String,
+                                 _ parameters: LocalizationParameters?) -> [LocalizationInput] {
     var possibleInputs = [LocalizationInput]()
     
     if let customKey = updated(key, withSeparator: parameters?.keySeparator) {
-        possibleInputs.append(LocalizationInput(key: customKey, table: parameters?.tableName, bundle: Bundle.main))
+        possibleInputs.append(LocalizationInput(key: customKey, table: parameters?.tableName, bundle: bundle))
     }
     
-    possibleInputs.append(LocalizationInput(key: key, table: parameters?.tableName, bundle: Bundle.main))
+    possibleInputs.append(LocalizationInput(key: key, table: parameters?.tableName, bundle: bundle))
     
     return possibleInputs
 }
@@ -67,7 +76,7 @@ private func updated(_ key: String, withSeparator separator: String?) -> String?
 }
 
 private func attempt(_ inputs: [LocalizationInput]) -> String? {
-    return inputs.compactMap { attempt($0) }.first
+    inputs.compactMap { attempt($0) }.first
 }
 
 private func attempt(_ input: LocalizationInput) -> String? {
@@ -80,13 +89,27 @@ private func attempt(_ input: LocalizationInput) -> String? {
     return nil
 }
 
+/// :nodoc:
+public enum PaymentStyle {
+    case needsRedirectToThirdParty(String)
+
+    case immediate
+}
+
 /// Helper function to create a localized submit button title. Optionally, the button title can include the given amount.
 ///
 /// :nodoc:
 ///
 /// - Parameter amount: The amount to include in the submit button title.
+/// - Parameter paymentMethodName: The payment method name.
 /// - Parameter parameters: The localization parameters.
-public func ADYLocalizedSubmitButtonTitle(with amount: Payment.Amount?, _ parameters: LocalizationParameters?) -> String {
+public func ADYLocalizedSubmitButtonTitle(with amount: Payment.Amount?,
+                                          style: PaymentStyle,
+                                          _ parameters: LocalizationParameters?) -> String {
+    if let amount = amount, amount.value == 0 {
+        return ADYLocalizedZeroPaymentAuthorisationButtonTitle(style: style,
+                                                               parameters)
+    }
     guard let formattedAmount = amount?.formatted else {
         return ADYLocalizedString("adyen.submitButton", parameters)
     }
@@ -94,20 +117,12 @@ public func ADYLocalizedSubmitButtonTitle(with amount: Payment.Amount?, _ parame
     return ADYLocalizedString("adyen.submitButton.formatted", parameters, formattedAmount)
 }
 
-internal extension Bundle {
-    // swiftlint:disable explicit_acl
-    
-    /// The main bundle of the framework.
-    static let core: Bundle = {
-        Bundle(for: Coder.self)
-    }()
-    
-    /// The bundle in which the framework's resources are located.
-    static let internalResources: Bundle = {
-        let url = core.url(forResource: "Adyen", withExtension: "bundle")
-        let bundle = url.flatMap { Bundle(url: $0) }
-        return bundle ?? core
-    }()
-    
-    // swiftlint:enable explicit_acl
+private func ADYLocalizedZeroPaymentAuthorisationButtonTitle(style: PaymentStyle,
+                                                             _ parameters: LocalizationParameters?) -> String {
+    switch style {
+    case let .needsRedirectToThirdParty(name):
+        return ADYLocalizedString("adyen.preauthorizeWith", parameters, name)
+    case .immediate:
+        return ADYLocalizedString("adyen.confirmPreauthorization", parameters)
+    }
 }

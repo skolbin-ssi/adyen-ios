@@ -11,7 +11,7 @@ import UIKit
 public final class ListCell: UITableViewCell {
     
     /// :nodoc:
-    public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         accessibilityTraits = .button
@@ -21,13 +21,9 @@ public final class ListCell: UITableViewCell {
     }
     
     /// :nodoc:
+    @available(*, unavailable)
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    /// :nodoc:
-    public override func prepareForReuse() {
-        item = nil
     }
     
     // MARK: - Item
@@ -108,7 +104,7 @@ public final class ListCell: UITableViewCell {
         NSLayoutConstraint.activate(constraints)
         
         let heightConstraint = contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48.0)
-        heightConstraint.priority = .required
+        heightConstraint.priority = .defaultHigh
         heightConstraint.isActive = true
     }
     

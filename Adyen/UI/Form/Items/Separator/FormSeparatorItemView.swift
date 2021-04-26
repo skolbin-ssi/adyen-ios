@@ -5,6 +5,7 @@
 //
 
 import Foundation
+import UIKit
 
 /// A view representing a separator line item.
 internal final class FormSeparatorItemView: FormItemView<FormSeparatorItem> {
@@ -18,10 +19,6 @@ internal final class FormSeparatorItemView: FormItemView<FormSeparatorItem> {
         addSubview(separator)
         
         configureConstraints()
-    }
-    
-    internal required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - Separator
@@ -39,15 +36,8 @@ internal final class FormSeparatorItemView: FormItemView<FormSeparatorItem> {
     // MARK: - Layout
     
     private func configureConstraints() {
-        let constraints = [
-            separator.topAnchor.constraint(equalTo: topAnchor),
-            separator.leadingAnchor.constraint(equalTo: leadingAnchor),
-            separator.trailingAnchor.constraint(equalTo: trailingAnchor),
-            separator.bottomAnchor.constraint(equalTo: bottomAnchor),
-            separator.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale)
-        ]
-        
-        NSLayoutConstraint.activate(constraints)
+        separator.adyen.anchore(inside: self)
+        separator.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale).isActive = true
     }
     
 }

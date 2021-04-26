@@ -5,6 +5,7 @@
 //
 
 import Foundation
+import UIKit
 
 /// A control to select a phone extension from a list.
 internal class PhoneExtensionInputControl: UIControl, AnyFormItemView {
@@ -16,10 +17,10 @@ internal class PhoneExtensionInputControl: UIControl, AnyFormItemView {
     internal var childItemViews: [AnyFormItemView] = []
     
     /// The country flag view.
-    internal lazy var flagView: UILabel = UILabel()
+    internal lazy var flagView = UILabel()
     
     /// The chevron image view.
-    internal lazy var chevronView: UIImageView = UIImageView(image: accessoryImage)
+    internal lazy var chevronView = UIImageView(image: accessoryImage)
     
     /// The phone code label.
     internal lazy var phoneExtensionLabel: UILabel = {
@@ -28,11 +29,12 @@ internal class PhoneExtensionInputControl: UIControl, AnyFormItemView {
         label.textAlignment = style.textAlignment
         label.textColor = style.color
         label.font = style.font
+        label.adjustsFontForContentSizeCategory = true
         
         return label
     }()
     
-    internal override var accessibilityIdentifier: String? {
+    override internal var accessibilityIdentifier: String? {
         didSet {
             phoneExtensionLabel.accessibilityIdentifier = accessibilityIdentifier.map {
                 ViewIdentifierBuilder.build(scopeInstance: $0, postfix: "label")
@@ -62,25 +64,26 @@ internal class PhoneExtensionInputControl: UIControl, AnyFormItemView {
     }
     
     /// :nodoc:
+    @available(*, unavailable)
     internal required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     /// The input view.
-    internal override var inputView: UIView? { return _inputView }
+    override internal var inputView: UIView? { _inputView }
     
     /// :nodoc:
-    internal override var canBecomeFirstResponder: Bool { return true }
+    override internal var canBecomeFirstResponder: Bool { true }
     
     /// :nodoc:
-    internal override func resignFirstResponder() -> Bool {
+    override internal func resignFirstResponder() -> Bool {
         let result = super.resignFirstResponder()
         onDidResignFirstResponder?()
         return result
     }
     
     /// :nodoc:
-    internal override func becomeFirstResponder() -> Bool {
+    override internal func becomeFirstResponder() -> Bool {
         let result = super.becomeFirstResponder()
         onDidBecomeFirstResponder?()
         return result
@@ -106,7 +109,7 @@ internal class PhoneExtensionInputControl: UIControl, AnyFormItemView {
     
     /// The chevron image.
     private var accessoryImage: UIImage? { UIImage(named: "chevron_down",
-                                                   in: Bundle.internalResources,
+                                                   in: Bundle.coreInternalResources,
                                                    compatibleWith: nil) }
     
     /// :nodoc:
@@ -115,14 +118,7 @@ internal class PhoneExtensionInputControl: UIControl, AnyFormItemView {
     /// :nodoc:
     private func applyConstraints() {
         stackView.translatesAutoresizingMaskIntoConstraints = false
-        let constraints = [
-            stackView.topAnchor.constraint(equalTo: topAnchor),
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -1)
-        ]
-        
-        NSLayoutConstraint.activate(constraints)
+        stackView.adyen.anchore(inside: self, with: .init(top: 0, left: 0, bottom: -1, right: -6))
     }
     
 }

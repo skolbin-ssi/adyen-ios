@@ -5,35 +5,43 @@
 //
 
 import Foundation
+import UIKit
 
 /// Contains the styling customization options for a text item in a form.
-public struct FormTextItemStyle: ViewStyle {
+public struct FormTextItemStyle: FormValueItemStyle {
     
     /// The title style.
-    public var title: TextStyle = TextStyle(font: .systemFont(ofSize: 13.0),
-                                            color: UIColor.AdyenCore.componentSecondaryLabel,
-                                            textAlignment: .natural)
+    public var title = TextStyle(font: .preferredFont(forTextStyle: .footnote),
+                                 color: UIColor.Adyen.componentSecondaryLabel,
+                                 textAlignment: .natural)
     
     /// The text field's style.
-    public var text: TextStyle = TextStyle(font: .systemFont(ofSize: 17.0),
-                                           color: UIColor.AdyenCore.componentLabel,
-                                           textAlignment: .natural)
+    public var text = TextStyle(font: .preferredFont(forTextStyle: .body),
+                                color: UIColor.Adyen.componentLabel,
+                                textAlignment: .natural)
     
     /// The text field's placeholder text style.
     public var placeholderText: TextStyle?
     
     /// The icons' style.
-    public var icon: ImageStyle = ImageStyle(borderColor: UIColor(white: 0.0, alpha: 0.2),
-                                             borderWidth: 1.0 / UIScreen.main.nativeScale,
-                                             cornerRadius: 4.0,
-                                             clipsToBounds: true,
-                                             contentMode: .scaleAspectFit)
+    public var icon = ImageStyle(borderColor: UIColor.Adyen.componentSeparator,
+                                 borderWidth: 1.0 / UIScreen.main.nativeScale,
+                                 cornerRadius: 4.0,
+                                 clipsToBounds: true,
+                                 contentMode: .scaleAspectFit)
+    
+    /// The tint color of text field and separator in focused state.
+    public var tintColor: UIColor?
     
     /// :nodoc:
     public var backgroundColor: UIColor = .clear
     
-    /// Accent color for warnings and error messages.
-    public var errorColor: UIColor = UIColor.AdyenCore.defaultRed
+    /// The accent color for warnings and error messages.
+    public var errorColor = UIColor.Adyen.defaultRed
+    
+    /// The color for separator element.
+    /// If value is nil, the default color would be used.
+    public var separatorColor: UIColor?
     
     /// Initializes the form text item style.
     ///
@@ -49,6 +57,13 @@ public struct FormTextItemStyle: ViewStyle {
         self.text = text
         self.placeholderText = placeholderText
         self.icon = icon
+    }
+    
+    /// Initializes the text item's style with the default style and custom tint for all elements.
+    /// - Parameter tintColor: The color for tinting the item and validation icon.
+    public init(tintColor: UIColor) {
+        self.tintColor = tintColor
+        icon.tintColor = tintColor
     }
     
     /// Initializes the text item's style with the default style.

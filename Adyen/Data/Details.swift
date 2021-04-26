@@ -7,13 +7,7 @@
 import Foundation
 
 /// Contains details supplied by a component. These details are used to initiate or complete a payment.
-public protocol Details: Encodable {
-    
-    /// An encoded representation of the details.
-    @available(*, deprecated, message: "Use `encodable` property instead.")
-    var dictionaryRepresentation: [String: Any] { get }
-    
-}
+public protocol Details: Encodable {}
 
 public extension Details {
     
@@ -27,20 +21,3 @@ public protocol PaymentMethodDetails: Details {}
 
 /// Contains additional details that were retrieved to complete a payment.
 public protocol AdditionalDetails: Details {}
-
-/// :nodoc:
-public extension Details {
-    
-    /// An encoded representation of the details.
-    var dictionaryRepresentation: [String: Any] {
-        do {
-            let data = try Coder.encode(self) as Data
-            let dictionary = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-            
-            return dictionary ?? [:]
-        } catch {
-            return [:]
-        }
-    }
-    
-}

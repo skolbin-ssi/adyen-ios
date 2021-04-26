@@ -1,13 +1,15 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
+import Adyen
 import Foundation
+import UIKit
 
 /// A component that presents a list of items for each payment method with a component.
-internal final class PaymentMethodListComponent: PresentableComponent, Localizable {
+internal final class PaymentMethodListComponent: ComponentLoader, PresentableComponent, Localizable {
     
     /// The components that are displayed in the list.
     internal let components: SectionedComponents
@@ -31,13 +33,18 @@ internal final class PaymentMethodListComponent: PresentableComponent, Localizab
     
     /// :nodoc:
     internal var viewController: UIViewController { listViewController }
+
+    private let brandProtectedComponents: Set = ["applepay"]
     
     internal lazy var listViewController: ListViewController = {
         func item(for component: PaymentComponent) -> ListItem {
             let showsDisclosureIndicator = (component as? PresentableComponent)?.requiresModalPresentation == true
             
             let displayInformation = component.paymentMethod.localizedDisplayInformation(using: localizationParameters)
-            let listItem = ListItem(title: displayInformation.title, style: style.listItem)
+            let isProtected = brandProtectedComponents.contains(component.paymentMethod.type)
+            let listItem = ListItem(title: displayInformation.title,
+                                    style: style.listItem,
+                                    canModifyIcon: !isProtected)
             listItem.identifier = ViewIdentifierBuilder.build(scopeInstance: self, postfix: listItem.title)
             listItem.imageURL = LogoURLProvider.logoURL(for: component.paymentMethod, environment: environment)
             listItem.subtitle = displayInformation.subtitle
@@ -73,7 +80,7 @@ internal final class PaymentMethodListComponent: PresentableComponent, Localizab
     ///
     /// - Parameter component: The component for which to start a loading animation.
     internal func startLoading(for component: PaymentComponent) {
-        let allListItems = listViewController.sections.flatMap { $0.items }
+        let allListItems = listViewController.sections.flatMap(\.items)
         let allComponents = [components.stored, components.regular].flatMap { $0 }
         
         guard let index = allComponents.firstIndex(where: { $0 === component }) else {
@@ -84,10 +91,8 @@ internal final class PaymentMethodListComponent: PresentableComponent, Localizab
     }
     
     /// :nodoc:
-    internal func stopLoading(withSuccess success: Bool, completion: (() -> Void)?) {
+    internal func stopLoading() {
         listViewController.stopLoading()
-        
-        completion?()
     }
     
 }

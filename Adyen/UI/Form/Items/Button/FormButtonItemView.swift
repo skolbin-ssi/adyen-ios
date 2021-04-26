@@ -5,6 +5,7 @@
 //
 
 import Foundation
+import UIKit
 
 /// A view representing a footer item.
 internal final class FormButtonItemView: FormItemView<FormButtonItem>, Observer {
@@ -14,24 +15,21 @@ internal final class FormButtonItemView: FormItemView<FormButtonItem>, Observer 
     /// - Parameter item: The item represented by the view.
     internal required init(item: FormButtonItem) {
         super.init(item: item)
+        backgroundColor = item.style.backgroundColor
         
         addSubview(submitButton)
         
-        bind(item.showsActivityIndicator, to: submitButton, at: \.showsActivityIndicator)
+        bind(item.$showsActivityIndicator, to: submitButton, at: \.showsActivityIndicator)
+        bind(item.$enabled, to: submitButton, at: \.isEnabled)
         
-        preservesSuperviewLayoutMargins = true
-        configureConstraints()
-    }
-    
-    internal required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        submitButton.adyen.anchore(inside: self)
     }
     
     // MARK: - Submit Button
     
-    private lazy var submitButton: SubmitButton = {
+    internal lazy var submitButton: SubmitButton = {
         
-        let submitButton = SubmitButton(style: item.style)
+        let submitButton = SubmitButton(style: item.style.button)
         
         submitButton.title = item.title
         submitButton.addTarget(self, action: #selector(didSelectSubmitButton), for: .touchUpInside)
@@ -46,19 +44,6 @@ internal final class FormButtonItemView: FormItemView<FormButtonItem>, Observer 
     
     @objc private func didSelectSubmitButton() {
         item.buttonSelectionHandler?()
-    }
-    
-    // MARK: - Layout
-    
-    private func configureConstraints() {
-        let constraints = [
-            submitButton.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor),
-            submitButton.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
-            submitButton.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
-            submitButton.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor)
-        ]
-        
-        NSLayoutConstraint.activate(constraints)
     }
     
 }

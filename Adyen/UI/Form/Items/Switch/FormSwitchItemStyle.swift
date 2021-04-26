@@ -5,14 +5,22 @@
 //
 
 import Foundation
+import UIKit
 
 /// Contains the styling customization options for a switch item in a form.
-public struct FormSwitchItemStyle: ViewStyle {
+public struct FormSwitchItemStyle: FormValueItemStyle {
     
     /// The title style.
-    public var title: TextStyle = TextStyle(font: .systemFont(ofSize: 17.0),
-                                            color: UIColor.AdyenCore.componentLabel,
-                                            textAlignment: .natural)
+    public var title = TextStyle(font: .preferredFont(forTextStyle: .body),
+                                 color: UIColor.Adyen.componentLabel,
+                                 textAlignment: .natural)
+    
+    /// The color of `onTintColor` of switch.
+    public var tintColor: UIColor?
+    
+    /// The color for separator element.
+    /// If value is nil, the default color would be used.
+    public var separatorColor: UIColor?
     
     /// :nodoc:
     public var backgroundColor: UIColor = .clear

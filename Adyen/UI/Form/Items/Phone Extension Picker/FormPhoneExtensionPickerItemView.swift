@@ -27,35 +27,23 @@ internal final class FormPhoneExtensionPickerItemView: FormValueItemView<FormPho
     }
     
     /// :nodoc:
-    internal required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    override internal var canBecomeFirstResponder: Bool { true }
+    
+    /// :nodoc:
+    override internal func becomeFirstResponder() -> Bool {
+        inputControl.becomeFirstResponder()
     }
     
     /// :nodoc:
-    internal override var canBecomeFirstResponder: Bool { true }
-    
-    /// :nodoc:
-    internal override func becomeFirstResponder() -> Bool {
-        return inputControl.becomeFirstResponder()
-    }
-    
-    /// :nodoc:
-    internal override func resignFirstResponder() -> Bool {
-        return inputControl.resignFirstResponder()
+    override internal func resignFirstResponder() -> Bool {
+        inputControl.resignFirstResponder()
     }
     
     // MARK: - Layout
     
     private func configureConstraints() {
         inputControl.translatesAutoresizingMaskIntoConstraints = false
-        let constraints = [
-            inputControl.topAnchor.constraint(equalTo: topAnchor),
-            inputControl.leadingAnchor.constraint(equalTo: leadingAnchor),
-            inputControl.trailingAnchor.constraint(equalTo: trailingAnchor),
-            inputControl.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ]
-        
-        NSLayoutConstraint.activate(constraints)
+        inputControl.adyen.anchore(inside: self)
     }
     
     // MARK: - Private
@@ -63,7 +51,6 @@ internal final class FormPhoneExtensionPickerItemView: FormValueItemView<FormPho
     private func initialize() {
         showsSeparator = false
         addSubview(inputControl)
-        backgroundColor = item.style.backgroundColor
         configureConstraints()
         updateSelection()
     }
@@ -82,6 +69,7 @@ internal final class FormPhoneExtensionPickerItemView: FormValueItemView<FormPho
     
     private lazy var inputControl: PhoneExtensionInputControl = {
         let view = PhoneExtensionInputControl(inputView: pickerView, style: item.style.text)
+        view.chevronView.isHidden = item.selectableValues.count <= 1
         view.addTarget(self, action: #selector(self.handleTapAction), for: .touchUpInside)
         view.accessibilityIdentifier = item.identifier.map { ViewIdentifierBuilder.build(scopeInstance: $0, postfix: "inputControl") }
         view.onDidBecomeFirstResponder = { [weak self] in
@@ -96,6 +84,7 @@ internal final class FormPhoneExtensionPickerItemView: FormValueItemView<FormPho
     }()
     
     @objc private func handleTapAction() {
+        guard item.selectableValues.count > 1 else { return }
         _ = becomeFirstResponder()
     }
     

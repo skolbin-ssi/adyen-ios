@@ -5,6 +5,7 @@
 //
 
 import Foundation
+import UIKit
 
 // MARK: - DimmingPresentationController
 
@@ -20,7 +21,7 @@ internal final class DimmingPresentationController: UIPresentationController {
     private lazy var dimmingView: UIView = {
         let dimmingView = UIView()
         dimmingView.translatesAutoresizingMaskIntoConstraints = false
-        dimmingView.backgroundColor = UIColor.AdyenDropIn.dimmBackground
+        dimmingView.backgroundColor = UIColor.Adyen.dimmBackground
         dimmingView.alpha = 0.0
         
         return dimmingView
@@ -28,22 +29,21 @@ internal final class DimmingPresentationController: UIPresentationController {
     
     private func attachDimmigView(to view: UIView) {
         view.insertSubview(dimmingView, at: 0)
-        let constraints = [
-            dimmingView.topAnchor.constraint(equalTo: view.topAnchor),
-            dimmingView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            dimmingView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            dimmingView.leftAnchor.constraint(equalTo: view.leftAnchor)
-        ]
-        NSLayoutConstraint.activate(constraints)
+        dimmingView.adyen.anchore(inside: view)
     }
     
-    internal override func containerViewWillLayoutSubviews() {
+    override internal func containerViewWillLayoutSubviews() {
         super.containerViewWillLayoutSubviews()
         layoutDidChanged()
     }
     
+    override internal var frameOfPresentedViewInContainerView: CGRect {
+        guard let containerView = containerView else { return super.frameOfPresentedViewInContainerView }
+        return containerView.frame
+    }
+    
     /// :nodoc:
-    internal override func presentationTransitionWillBegin() {
+    override internal func presentationTransitionWillBegin() {
         super.presentationTransitionWillBegin()
         
         guard let containerView = containerView else { return }
@@ -55,12 +55,12 @@ internal final class DimmingPresentationController: UIPresentationController {
     }
     
     /// :nodoc:
-    internal override func presentationTransitionDidEnd(_ completed: Bool) {
+    override internal func presentationTransitionDidEnd(_ completed: Bool) {
         super.presentationTransitionDidEnd(completed)
     }
     
     /// :nodoc:
-    internal override func dismissalTransitionWillBegin() {
+    override internal func dismissalTransitionWillBegin() {
         super.dismissalTransitionWillBegin()
         
         presentedViewController.transitionCoordinator?.animate(alongsideTransition: { _ in

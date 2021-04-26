@@ -21,11 +21,12 @@ internal final class FormView: UIScrollView {
     }
     
     /// :nodoc:
+    @available(*, unavailable)
     internal required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public var preferredContentSize: CGSize {
+    override internal var intrinsicContentSize: CGSize {
         let targetSize = CGSize(width: self.superview?.bounds.width ?? UIScreen.main.bounds.width,
                                 height: UIView.layoutFittingCompressedSize.height)
         return stackView.systemLayoutSizeFitting(targetSize,
@@ -42,7 +43,7 @@ internal final class FormView: UIScrollView {
         stackView.addArrangedSubview(itemView)
     }
     
-    internal override var contentOffset: CGPoint {
+    override internal var contentOffset: CGPoint {
         get {
             super.contentOffset
         }
@@ -63,19 +64,12 @@ internal final class FormView: UIScrollView {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
-    
+
     // MARK: - Layout
-    
+
     private func configureConstraints() {
-        let constraints = [
-            stackView.topAnchor.constraint(equalTo: topAnchor),
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            stackView.widthAnchor.constraint(equalTo: widthAnchor)
-        ]
-        
-        NSLayoutConstraint.activate(constraints)
+        stackView.adyen.anchore(inside: self)
+        stackView.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
     }
     
 }

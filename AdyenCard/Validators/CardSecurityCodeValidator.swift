@@ -4,18 +4,23 @@
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
+import Adyen
 import Foundation
 
 /// Validates a card's security code.
 public final class CardSecurityCodeValidator: NumericStringValidator, Observer {
     
     /// Initiate new instance of CardSecurityCodeValidator
-    /// - Parameter publisher: Observable of a card type
-    public init(publisher: Observable<CardType?>? = nil) {
+    public init() {
         super.init(minimumLength: 3, maximumLength: 4)
-        guard let publisher = publisher else { return }
+    }
+    
+    /// Initiate new instance of CardSecurityCodeValidator
+    /// - Parameter publisher: Observable of a card type
+    public init(publisher: Observable<CardType?>) {
+        super.init(minimumLength: 3, maximumLength: 4)
         
-        updateExpectedLength(from: publisher.value)
+        updateExpectedLength(from: publisher.wrappedValue)
         
         observe(publisher) { [weak self] cardType in
             self?.updateExpectedLength(from: cardType)

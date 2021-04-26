@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -12,6 +12,10 @@ public final class ListViewController: UITableViewController {
     
     /// Indicates the list view controller UI style.
     public let style: ListComponentStyle
+
+    /// :nodoc:
+    /// Delegate to handle different viewController events.
+    public weak var delegate: ViewControllerDelegate?
     
     /// Initializes the list view controller.
     ///
@@ -26,12 +30,13 @@ public final class ListViewController: UITableViewController {
     }
     
     /// :nodoc:
+    @available(*, unavailable)
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     /// :nodoc:
-    public override var preferredContentSize: CGSize {
+    override public var preferredContentSize: CGSize {
         get { tableView.contentSize }
         
         // swiftlint:disable:next unused_setter_value
@@ -87,7 +92,7 @@ public final class ListViewController: UITableViewController {
     // MARK: - View
     
     /// :nodoc:
-    public override func viewDidLoad() {
+    override public func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = style.backgroundColor
@@ -98,9 +103,15 @@ public final class ListViewController: UITableViewController {
         tableView.separatorColor = .clear
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.sectionFooterHeight = 0.0
-        tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 56.0
         tableView.register(ListCell.self, forCellReuseIdentifier: cellReuseIdentifier)
+
+        delegate?.viewDidLoad(viewController: self)
+    }
+
+    override public func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        delegate?.viewDidAppear(viewController: self)
     }
     
     // MARK: - UITableView
@@ -108,17 +119,17 @@ public final class ListViewController: UITableViewController {
     private let cellReuseIdentifier = "Cell"
     
     /// :nodoc:
-    public override func numberOfSections(in tableView: UITableView) -> Int {
-        return sections.count
+    override public func numberOfSections(in tableView: UITableView) -> Int {
+        sections.count
     }
     
     /// :nodoc:
-    public override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return sections[section].items.count
+    override public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        sections[section].items.count
     }
     
     /// :nodoc:
-    public override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    override public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         guard let title = sections[section].title else {
             return nil
         }
@@ -131,12 +142,12 @@ public final class ListViewController: UITableViewController {
     }
     
     /// :nodoc:
-    public override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return sections[section].title == nil ? 0 : 44.0
+    override public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        sections[section].title == nil ? 0 : 44.0
     }
     
     /// :nodoc:
-    public override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: cellReuseIdentifier, for: indexPath) as? ListCell else {
             fatalError("Failed to dequeue cell.")
         }
@@ -147,7 +158,7 @@ public final class ListViewController: UITableViewController {
     }
     
     /// :nodoc:
-    public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
         let item = sections[indexPath.section].items[indexPath.item]

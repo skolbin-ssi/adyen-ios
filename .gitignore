@@ -28,3 +28,11 @@ DerivedData
 
 # Carthage
 Carthage/
+
+#Internal
+Internal/
+.gitmodules
+
+#Swift Package Manager
+.swiftpm
+Package.resolved

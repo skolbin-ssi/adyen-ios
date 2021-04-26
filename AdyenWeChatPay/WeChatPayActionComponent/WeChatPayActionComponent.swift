@@ -4,6 +4,10 @@
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
+#if canImport(AdyenActions)
+    import AdyenActions
+#endif
+import Adyen
 import AdyenWeChatPayInternal
 import Foundation
 
@@ -44,13 +48,13 @@ public final class WeChatPaySDKActionComponent: NSObject, AnyWeChatPaySDKActionC
     
     /// Checks if the current device supports WeChat Pay.
     public static func isDeviceSupported() -> Bool {
-        assertWeChatPayAppSchemeWhitlisted()
+        assertWeChatPayAppSchemeConfigured()
         WXApi.registerApp("")
         return WXApi.isWXAppInstalled() && WXApi.isWXAppSupport()
     }
     
-    private static func assertWeChatPayAppSchemeWhitlisted() {
-        guard Bundle.main.adyen.isSchemeWhitelisted("weixin") else {
+    private static func assertWeChatPayAppSchemeConfigured() {
+        guard Bundle.main.adyen.isSchemeConfigured("weixin") else {
             assertionFailure("weixin:// scheme must be added to Info.plist under LSApplicationQueriesSchemes key.")
             return
         }
@@ -58,8 +62,10 @@ public final class WeChatPaySDKActionComponent: NSObject, AnyWeChatPaySDKActionC
     
 }
 
+/// :nodoc:
 extension WeChatPaySDKActionComponent: WXApiDelegate {
-    
+
+    /// :nodoc:
     public func onResp(_ resp: BaseResp) {
         guard let currentlyHandledAction = currentlyHandledAction else { assertionFailure(); return }
         let additionalData = WeChatPayAdditionalDetails(resultCode: String(resp.errCode))
@@ -70,7 +76,9 @@ extension WeChatPaySDKActionComponent: WXApiDelegate {
     
 }
 
+/// :nodoc:
 private extension PayReq {
+    /// :nodoc:
     convenience init(actionData: WeChatPaySDKData) {
         self.init()
         

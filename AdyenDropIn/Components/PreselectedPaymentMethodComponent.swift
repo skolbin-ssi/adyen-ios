@@ -1,10 +1,12 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
+import Adyen
 import Foundation
+import UIKit
 
 /// Defines the methods a delegate of the preselected payment method component should implement.
 internal protocol PreselectedPaymentMethodComponentDelegate: AnyObject {
@@ -17,10 +19,16 @@ internal protocol PreselectedPaymentMethodComponentDelegate: AnyObject {
 }
 
 /// A component that presents a single preselected payment method and option to open more payment methods.
-internal final class PreselectedPaymentMethodComponent: PresentableComponent, Localizable {
+internal final class PreselectedPaymentMethodComponent: ComponentLoader,
+    PresentableComponent,
+    PaymentAwareComponent,
+    Localizable {
     
     private let title: String
     private let defaultComponent: PaymentComponent
+
+    /// :nodoc:
+    internal var paymentMethod: PaymentMethod { defaultComponent.paymentMethod }
     
     /// Delegate actions.
     internal weak var delegate: PreselectedPaymentMethodComponentDelegate?
@@ -45,23 +53,21 @@ internal final class PreselectedPaymentMethodComponent: PresentableComponent, Lo
     // MARK: - View Controller
     
     public lazy var viewController: UIViewController = {
-        let paymentMethod = defaultComponent.paymentMethod
-        Analytics.sendEvent(component: paymentMethod.type, flavor: _isDropIn ? .dropin : .components, environment: environment)
-        
         let formViewController = FormViewController(style: style)
         formViewController.localizationParameters = localizationParameters
+        formViewController.delegate = self
         
         formViewController.append(listItem)
-        formViewController.append(submitButtonItem)
+        formViewController.append(submitButtonItem.withPadding(padding: .init(top: 0, left: 0, bottom: -8, right: 0)))
         formViewController.append(separator)
-        formViewController.append(openAllButtonItem)
+        formViewController.append(openAllButtonItem.withPadding(padding: .init(top: 0, left: 0, bottom: -14, right: 0)))
         
         formViewController.title = title
         return formViewController
     }()
     
     private lazy var separator: FormSeparatorItem = {
-        let separator: FormSeparatorItem = FormSeparatorItem(color: style.separatorColor)
+        let separator = FormSeparatorItem(color: style.separatorColor ?? UIColor.Adyen.componentSeparator)
         separator.identifier = ViewIdentifierBuilder.build(scopeInstance: self, postfix: "separator")
         return separator
     }()
@@ -77,19 +83,20 @@ internal final class PreselectedPaymentMethodComponent: PresentableComponent, Lo
     }()
     
     private lazy var submitButtonItem: FormButtonItem = {
-        let item = FormButtonItem(style: style.mainButton)
-        item.title = ADYLocalizedSubmitButtonTitle(with: payment?.amount, localizationParameters)
+        let item = FormButtonItem(style: style.mainButtonItem)
+        item.title = ADYLocalizedSubmitButtonTitle(with: payment?.amount,
+                                                   style: .immediate,
+                                                   localizationParameters)
         item.identifier = ViewIdentifierBuilder.build(scopeInstance: self, postfix: "submitButton")
         let component = self.defaultComponent
         item.buttonSelectionHandler = { [weak self] in
-            item.showsActivityIndicator.value = true
             self?.delegate?.didProceed(with: component)
         }
         return item
     }()
     
     private lazy var openAllButtonItem: FormButtonItem = {
-        let item = FormButtonItem(style: style.secondaryButton)
+        let item = FormButtonItem(style: style.secondaryButtonItem)
         item.title = ADYLocalizedString("adyen.dropIn.preselected.openAll.title", localizationParameters)
         item.identifier = ViewIdentifierBuilder.build(scopeInstance: self, postfix: "openAllButton")
         item.buttonSelectionHandler = { [weak self] in
@@ -98,9 +105,15 @@ internal final class PreselectedPaymentMethodComponent: PresentableComponent, Lo
         return item
     }()
     
-    internal func stopLoading(withSuccess success: Bool, completion: (() -> Void)?) {
-        submitButtonItem.showsActivityIndicator.value = false
-        completion?()
+    public func startLoading(for component: PaymentComponent) {
+        guard component === defaultComponent else { return }
+        submitButtonItem.showsActivityIndicator = true
+        openAllButtonItem.enabled = false
+    }
+    
+    internal func stopLoading() {
+        submitButtonItem.showsActivityIndicator = false
+        openAllButtonItem.enabled = true
     }
     
     // MARK: - Localization
@@ -109,3 +122,5 @@ internal final class PreselectedPaymentMethodComponent: PresentableComponent, Lo
     public var localizationParameters: LocalizationParameters?
     
 }
+
+extension PreselectedPaymentMethodComponent: TrackableComponent {}

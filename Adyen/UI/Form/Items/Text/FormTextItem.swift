@@ -5,10 +5,11 @@
 //
 
 import Foundation
+import UIKit
 
 /// An item in which text can be entered using a text field.
 /// :nodoc:
-public protocol FormTextItem: FormValueItem, ValidatableFormItem {
+public protocol FormTextItem: FormValueItem, ValidatableFormItem, InputViewRequiringFormItem {
     
     /// The text item style.
     var style: FormTextItemStyle { get }
@@ -199,7 +200,7 @@ public extension FormTextItem {
     }
 }
 
-private struct FormTextItemAssociatedKeys {
+private enum FormTextItemAssociatedKeys {
     internal static var autocapitalizationType = "autocapitalizationType"
     internal static var autocorrectionType = "autocorrectionType"
     internal static var keyboardType = "keyboardType"
