@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -15,7 +15,7 @@ public final class FormPhoneNumberItem: FormTextItem {
     
     /// The phone prefix value.
     public var prefix: String {
-        phonePrefixItem.value.phoneExtension
+        phonePrefixItem.value.element.phoneExtension
     }
     
     public var phoneNumber: String {
@@ -31,19 +31,19 @@ public final class FormPhoneNumberItem: FormTextItem {
                 style: FormTextItemStyle,
                 localizationParameters: LocalizationParameters? = nil) {
         phonePrefixItem = FormPhoneExtensionPickerItem(selectableValues: selectableValues, style: style)
+        super.init(style: style)
         phonePrefixItem.identifier = ViewIdentifierBuilder.build(scopeInstance: self, postfix: "phoneExtensionPickerItem")
-        
-        self.style = style
-        title = ADYLocalizedString("adyen.phoneNumber.title", localizationParameters)
-        placeholder = ADYLocalizedString("adyen.phoneNumber.placeholder", localizationParameters)
+
+        title = localizedString(.phoneNumberTitle, localizationParameters)
+        placeholder = localizedString(.phoneNumberPlaceholder, localizationParameters)
         formatter = NumericFormatter()
         validator = NumericStringValidator(minimumLength: 1, maximumLength: 15)
-        validationFailureMessage = ADYLocalizedString("adyen.phoneNumber.invalid", localizationParameters)
+        validationFailureMessage = localizedString(.phoneNumberInvalid, localizationParameters)
         keyboardType = .numberPad
     }
     
     /// :nodoc:
-    public func build(with builder: FormItemViewBuilder) -> AnyFormItemView {
+    override public func build(with builder: FormItemViewBuilder) -> AnyFormItemView {
         builder.build(with: self)
     }
     

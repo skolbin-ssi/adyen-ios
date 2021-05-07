@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -8,7 +8,7 @@ import UIKit
 
 /// A view representing a switch item.
 /// :nodoc:
-public final class FormSwitchItemView: FormValueItemView<FormSwitchItem> {
+public final class FormSwitchItemView: FormValueItemView<Bool, FormSwitchItemStyle, FormSwitchItem> {
     
     /// Initializes the switch item view.
     ///
@@ -24,33 +24,12 @@ public final class FormSwitchItemView: FormValueItemView<FormSwitchItem> {
         accessibilityValue = switchControl.accessibilityValue
         
         addSubview(stackView)
-        stackView.adyen.anchore(inside: self.layoutMarginsGuide)
+        stackView.adyen.anchor(inside: self.layoutMarginsGuide)
     }
-    
-    private var switchDelegate: FormValueItemViewDelegate? {
-        delegate as? FormValueItemViewDelegate
-    }
-    
-    // MARK: - Title Label
-    
-    private lazy var titleLabel: UILabel = {
-        let titleLabel = UILabel()
-        titleLabel.font = item.style.title.font
-        titleLabel.adjustsFontForContentSizeCategory = true
-        titleLabel.textColor = item.style.title.color
-        titleLabel.textAlignment = item.style.title.textAlignment
-        titleLabel.backgroundColor = item.style.title.backgroundColor
-        titleLabel.text = item.title
-        titleLabel.numberOfLines = 0
-        titleLabel.isAccessibilityElement = false
-        titleLabel.accessibilityIdentifier = item.identifier.map { ViewIdentifierBuilder.build(scopeInstance: $0, postfix: "titleLabel") }
-        
-        return titleLabel
-    }()
     
     // MARK: - Switch Control
     
-    private lazy var switchControl: UISwitch = {
+    internal lazy var switchControl: UISwitch = {
         let switchControl = UISwitch()
         switchControl.isOn = item.value
         switchControl.onTintColor = item.style.tintColor
@@ -65,8 +44,6 @@ public final class FormSwitchItemView: FormValueItemView<FormSwitchItem> {
     @objc private func switchControlValueChanged() {
         accessibilityValue = switchControl.accessibilityValue
         item.value = switchControl.isOn
-        
-        switchDelegate?.didChangeValue(in: self)
     }
     
     /// :nodoc:

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -31,6 +31,11 @@ internal struct PaymentsRequest: Request {
         
         try container.encode(data.paymentMethod.encodable, forKey: .details)
         try container.encode(data.storePaymentMethod, forKey: .storePaymentMethod)
+        try container.encode(data.shopperName, forKey: .shopperName)
+        try container.encode(data.emailAddress ?? Configuration.shopperEmail, forKey: .shopperEmail)
+        try container.encode(data.telephoneNumber, forKey: .telephoneNumber)
+        try container.encode(data.billingAddress, forKey: .billingAddress)
+        try container.encode(Locale.current.identifier, forKey: .shopperLocale)
         try container.encodeIfPresent(data.browserInfo, forKey: .browserInfo)
         try container.encode("iOS", forKey: .channel)
         try container.encode(amount, forKey: .amount)
@@ -38,7 +43,6 @@ internal struct PaymentsRequest: Request {
         try container.encode(Configuration.countryCode, forKey: .countryCode)
         try container.encode(Configuration.returnUrl, forKey: .returnUrl)
         try container.encode(Configuration.shopperReference, forKey: .shopperReference)
-        try container.encode(Configuration.shopperEmail, forKey: .shopperEmail)
         try container.encode(Configuration.additionalData, forKey: .additionalData)
         try container.encode(Configuration.merchantAccount, forKey: .merchantAccount)
     }
@@ -56,6 +60,10 @@ internal struct PaymentsRequest: Request {
         case additionalData
         case merchantAccount
         case browserInfo
+        case shopperName
+        case telephoneNumber
+        case shopperLocale
+        case billingAddress
     }
     
 }

@@ -1,43 +1,42 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
 import UIKit
 
-/// The interface of the delegate of a value item view.
-/// :nodoc:
-public protocol FormValueItemViewDelegate: FormItemViewDelegate {
-    
-    /// Invoked when the value of the item in an item view changed.
-    ///
-    /// - Parameter itemView: The item view in which the value changed.
-    func didChangeValue<T: FormValueItem>(in itemView: FormValueItemView<T>)
-    
-}
-
 /// A view representing a value item.
 /// :nodoc:
-open class FormValueItemView<ItemType: FormValueItem>: FormItemView<ItemType>, AnyFormValueItemView {
-    
+open class FormValueItemView<ValueType, Style, ItemType: FormValueItem<ValueType, Style>>: FormItemView<ItemType>, AnyFormValueItemView {
+
+    // MARK: - Title Label
+
+    /// The top label view.
+    /// :nodoc:
+    public lazy var titleLabel: UILabel = {
+        let titleLabel = UILabel(style: item.style.title)
+        titleLabel.text = item.title
+        titleLabel.numberOfLines = 0
+        titleLabel.isAccessibilityElement = false
+        titleLabel.accessibilityIdentifier = item.identifier.map { ViewIdentifierBuilder.build(scopeInstance: $0, postfix: "titleLabel") }
+
+        return titleLabel
+    }()
+
     /// Initializes the value item view.
     ///
     /// - Parameter item: The item represented by the view.
     public required init(item: ItemType) {
         super.init(item: item)
-        
         addSubview(separatorView)
         configureSeparatorView()
+
+        bind(item.$title, to: self.titleLabel, at: \.text)
         
         tintColor = item.style.tintColor
         backgroundColor = item.style.backgroundColor
-
         gestureRecognizers = [UITapGestureRecognizer(target: self, action: #selector(becomeFirstResponder))]
-    }
-    
-    private var valueDelegate: FormValueItemViewDelegate? {
-        delegate as? FormValueItemViewDelegate
     }
     
     /// :nodoc:

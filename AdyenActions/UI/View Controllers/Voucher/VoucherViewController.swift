@@ -13,8 +13,11 @@ internal final class VoucherViewController: UIViewController {
 
     private let voucherView: UIView
 
-    internal init(voucherView: UIView) {
+    private let style: ViewStyle
+
+    internal init(voucherView: UIView, style: ViewStyle) {
         self.voucherView = voucherView
+        self.style = style
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -26,17 +29,17 @@ internal final class VoucherViewController: UIViewController {
     override internal func viewDidLoad() {
         super.viewDidLoad()
         buildUI()
-        view.backgroundColor = .clear
+        view.backgroundColor = style.backgroundColor
     }
 
     private func buildUI() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
-        scrollView.adyen.anchore(inside: view)
+        scrollView.adyen.anchor(inside: view.safeAreaLayoutGuide)
 
         voucherView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(voucherView)
-        voucherView.adyen.anchore(inside: scrollView)
+        voucherView.adyen.anchor(inside: scrollView)
         voucherView.widthAnchor.constraint(equalTo: scrollView.widthAnchor).isActive = true
     }
 
@@ -51,7 +54,7 @@ internal final class VoucherViewController: UIViewController {
         }
 
         // swiftlint:disable:next unused_setter_value
-        set { assertionFailure("""
+        set { AdyenAssertion.assert(message: """
         PreferredContentSize is overridden for this view controller.
         getter - returns minimum possible content size.
         setter - no implemented.

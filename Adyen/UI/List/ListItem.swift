@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -9,6 +9,9 @@ import Foundation
 /// A selectable item displayed in the list.
 /// :nodoc:
 public class ListItem: FormItem {
+
+    /// :nodoc:
+    public var subitems: [FormItem] = []
     
     /// The list item style.
     public let style: ListItemStyle

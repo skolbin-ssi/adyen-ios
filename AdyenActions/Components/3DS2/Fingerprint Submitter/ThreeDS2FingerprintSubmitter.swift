@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -33,7 +33,7 @@ internal final class ThreeDS2FingerprintSubmitter: AnyThreeDS2FingerprintSubmitt
                          paymentData: String?,
                          completionHandler: @escaping (Result<ThreeDSActionHandlerResult, Swift.Error>) -> Void) {
         guard let clientKey = clientKey else {
-            assertionFailure("Client key is missing.")
+            AdyenAssertion.assert(message: "Client key is missing.")
             completionHandler(.failure(ThreeDS2ComponentError.missingClientKey))
             return
         }

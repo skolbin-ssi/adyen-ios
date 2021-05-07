@@ -15,7 +15,7 @@ internal protocol AnyVoucherActionHandler: ActionComponent {
 /// A component that handles voucher action's.
 public final class VoucherComponent: AnyVoucherActionHandler {
 
-    /// Delegates `ViewController`'s presentation.
+    /// Delegates `PresentableComponent`'s presentation.
     public weak var presentationDelegate: PresentationDelegate?
 
     /// :nodoc:
@@ -69,7 +69,8 @@ public final class VoucherComponent: AnyVoucherActionHandler {
             let presentableComponent = PresentableComponentWrapper(component: self, viewController: viewController)
             presentationDelegate.present(component: presentableComponent)
         } else {
-            assertionFailure("presentationDelegate is nil, please provide a presentation delegate to present the VoucherComponent UI.")
+            let message = "PresentationDelegate is nil. Provide a presentation delegate to VoucherAction."
+            AdyenAssertion.assert(message: message)
         }
     }
 

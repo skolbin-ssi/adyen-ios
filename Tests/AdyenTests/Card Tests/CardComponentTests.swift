@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -58,21 +58,21 @@ class CardComponentTests: XCTestCase {
         sut.payment = payment
         sut.localizationParameters = LocalizationParameters(tableName: "AdyenUIHost", keySeparator: nil)
         
-        XCTAssertEqual(sut.expiryDateItem.title, ADYLocalizedString("adyen.card.expiryItem.title", nil))
-        XCTAssertEqual(sut.expiryDateItem.placeholder, ADYLocalizedString("adyen.card.expiryItem.placeholder", sut.localizationParameters))
-        XCTAssertEqual(sut.expiryDateItem.validationFailureMessage, ADYLocalizedString("adyen.card.expiryItem.invalid", sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.expiryDateItem.title, localizedString(.cardExpiryItemTitle, nil))
+        XCTAssertEqual(sut.cardViewController.expiryDateItem.placeholder, localizedString(.cardExpiryItemPlaceholder, sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.expiryDateItem.validationFailureMessage, localizedString(.cardExpiryItemInvalid, sut.localizationParameters))
         
-        XCTAssertEqual(sut.securityCodeItem.title, ADYLocalizedString("adyen.card.cvcItem.title", sut.localizationParameters))
-        XCTAssertNil(sut.securityCodeItem.placeholder)
-        XCTAssertEqual(sut.securityCodeItem.validationFailureMessage, ADYLocalizedString("adyen.card.cvcItem.invalid", sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.securityCodeItem.title, localizedString(.cardCvcItemTitle, sut.localizationParameters))
+        XCTAssertNil(sut.cardViewController.securityCodeItem.placeholder)
+        XCTAssertEqual(sut.cardViewController.securityCodeItem.validationFailureMessage, localizedString(.cardCvcItemInvalid, sut.localizationParameters))
         
-        XCTAssertEqual(sut.holderNameItem.title, ADYLocalizedString("adyen.card.nameItem.title", sut.localizationParameters))
-        XCTAssertEqual(sut.holderNameItem.placeholder, ADYLocalizedString("adyen.card.nameItem.placeholder", sut.localizationParameters))
-        XCTAssertEqual(sut.holderNameItem.validationFailureMessage, ADYLocalizedString("adyen.card.nameItem.invalid", sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.holderNameItem.title, localizedString(.cardNameItemTitle, sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.holderNameItem.placeholder, localizedString(.cardNameItemPlaceholder, sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.holderNameItem.validationFailureMessage, localizedString(.cardNameItemInvalid, sut.localizationParameters))
         
-        XCTAssertEqual(sut.storeDetailsItem.title, ADYLocalizedString("adyen.card.storeDetailsButton", sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.storeDetailsItem.title, localizedString(.cardStoreDetailsButton, sut.localizationParameters))
         
-        XCTAssertEqual(sut.button.title, ADYLocalizedSubmitButtonTitle(with: payment.amount, style: .immediate, sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.button.title, localizedSubmitButtonTitle(with: payment.amount, style: .immediate, sut.localizationParameters))
     }
     
     func testLocalizationWithCustomKeySeparator() {
@@ -86,21 +86,21 @@ class CardComponentTests: XCTestCase {
         sut.payment = payment
         sut.localizationParameters = LocalizationParameters(tableName: "AdyenUIHostCustomSeparator", keySeparator: "_")
         
-        XCTAssertEqual(sut.expiryDateItem.title, ADYLocalizedString("adyen.card.expiryItem.title", nil))
-        XCTAssertEqual(sut.expiryDateItem.placeholder, ADYLocalizedString("adyen_card_expiryItem_placeholder", sut.localizationParameters))
-        XCTAssertEqual(sut.expiryDateItem.validationFailureMessage, ADYLocalizedString("adyen_card_expiryItem_invalid", sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.expiryDateItem.title, localizedString(.cardExpiryItemTitle, nil))
+        XCTAssertEqual(sut.cardViewController.expiryDateItem.placeholder, localizedString(LocalizationKey(key: "adyen_card_expiryItem_placeholder"), sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.expiryDateItem.validationFailureMessage, localizedString(LocalizationKey(key: "adyen_card_expiryItem_invalid"), sut.localizationParameters))
         
-        XCTAssertEqual(sut.securityCodeItem.title, ADYLocalizedString("adyen_card_cvcItem_title", sut.localizationParameters))
-        XCTAssertNil(sut.securityCodeItem.placeholder)
-        XCTAssertEqual(sut.securityCodeItem.validationFailureMessage, ADYLocalizedString("adyen_card_cvcItem_invalid", sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.securityCodeItem.title, localizedString(LocalizationKey(key: "adyen_card_cvcItem_title"), sut.localizationParameters))
+        XCTAssertNil(sut.cardViewController.securityCodeItem.placeholder)
+        XCTAssertEqual(sut.cardViewController.securityCodeItem.validationFailureMessage, localizedString(LocalizationKey(key: "adyen_card_cvcItem_invalid"), sut.localizationParameters))
         
-        XCTAssertEqual(sut.holderNameItem.title, ADYLocalizedString("adyen_card_nameItem_title", sut.localizationParameters))
-        XCTAssertEqual(sut.holderNameItem.placeholder, ADYLocalizedString("adyen_card_nameItem_placeholder", sut.localizationParameters))
-        XCTAssertEqual(sut.holderNameItem.validationFailureMessage, ADYLocalizedString("adyen_card_nameItem_invalid", sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.holderNameItem.title, localizedString(LocalizationKey(key: "adyen_card_nameItem_title"), sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.holderNameItem.placeholder, localizedString(LocalizationKey(key: "adyen_card_nameItem_placeholder"), sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.holderNameItem.validationFailureMessage, localizedString(LocalizationKey(key: "adyen_card_nameItem_invalid"), sut.localizationParameters))
         
-        XCTAssertEqual(sut.storeDetailsItem.title, ADYLocalizedString("adyen_card_storeDetailsButton", sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.storeDetailsItem.title, localizedString(LocalizationKey(key: "adyen_card_storeDetailsButton"), sut.localizationParameters))
         
-        XCTAssertEqual(sut.button.title, ADYLocalizedSubmitButtonTitle(with: payment.amount, style: .immediate, sut.localizationParameters))
+        XCTAssertEqual(sut.cardViewController.button.title, localizedSubmitButtonTitle(with: payment.amount, style: .immediate, sut.localizationParameters))
     }
     
     func testUIConfiguration() {
@@ -320,7 +320,7 @@ class CardComponentTests: XCTestCase {
 
         let cardTypeProviderMock = CardTypeProviderMock()
         cardTypeProviderMock.onFetch = {
-            $0([CardBrand(type: .americanExpress)])
+            $0(BinLookupResponse(brands: [CardBrand(type: .americanExpress)]))
         }
 
         sut.cardBrandProvider = cardTypeProviderMock
@@ -439,7 +439,7 @@ class CardComponentTests: XCTestCase {
         }
         sut.cardPublicKeyProvider = cardPublicKeyProvider
 
-        sut.viewDidLoad(viewController: sut.formViewController)
+        sut.viewDidLoad(viewController: sut.cardViewController)
 
         waitForExpectations(timeout: 10, handler: nil)
     }
@@ -612,7 +612,7 @@ class CardComponentTests: XCTestCase {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
                 XCTAssertEqual(cardNumberItem.cardTypeLogos.count, 3)
                 XCTAssertEqual(cardLogoView.subviews.count, 3)
-                XCTAssertTrue(cardLogoView.arrangedSubviews.allSatisfy { $0.isHidden })
+                XCTAssertTrue(cardLogoView.arrangedSubviews.allSatisfy(\.isHidden))
 
                 expectation.fulfill()
             }
@@ -653,9 +653,12 @@ class CardComponentTests: XCTestCase {
     func testSubmit() {
         let method = CardPaymentMethod(type: "bcmc", name: "Test name", fundingSource: .credit, brands: ["visa", "amex", "mc"])
         // Dummy public key
-        let cardPublicKey = "B8C0F|AF259DD02EC8BA094F293D89D2B06C95BCFE4D83DC397E04BB81BD02BA53B23061E88138ADB9E301CD9D3A9E4EFF7A3B78AEA6939638233AD3C93E96F2FAF1F6233F21CC182531F6AEFD1428AACF2C1552B666B6CB47081542983CCED1016E82F74FDACA61F02B20B9F11D333CE35C0C73D09D47ABBC94C3467E8574C3C617209AA44109C1F5E9A0C2C2399B8A91C7EA24FE56FDF0AA3DA5B9DE85F487B33C7FD55FAE5B39177C7DB2545F03723960702F3602D3284BB1EB3C389AB6564393DFC0412FB23573543CDCC0F6647DC15201235791323E81C416D3BC8542AC6303E2A3803E8178187556E93770903781F02A4BFD85F8D75A2229F04480211F1C00D3"
+        let cardPublicKey = Dummy.dummyPublicKey
         let cardPublicKeyProvider = CardPublicKeyProvider(cardPublicKey: cardPublicKey)
+        var config = CardComponent.Configuration()
+        config.billingAddressMode = .full
         let sut = CardComponent(paymentMethod: method,
+                                configuration: config,
                                 cardPublicKeyProvider: cardPublicKeyProvider,
                                 clientKey: Dummy.dummyClientKey)
 
@@ -667,21 +670,40 @@ class CardComponentTests: XCTestCase {
             XCTAssertTrue(component === sut)
             XCTAssertTrue(data.paymentMethod is CardDetails)
 
+            let details = data.paymentMethod as! CardDetails
+            XCTAssertNotEqual(details.encryptedCardNumber, "4917 6100 0000 0000")
+            XCTAssertNotEqual(details.encryptedExpiryYear, "30")
+            XCTAssertNotEqual(details.encryptedExpiryMonth, "03")
+            XCTAssertNotEqual(details.encryptedSecurityCode, "737")
+
+            XCTAssertEqual(data.storePaymentMethod, true)
+
+            XCTAssertNil(data.billingAddress?.apartment)
+            XCTAssertEqual(data.billingAddress?.houseNumberOrName, "House Number")
+            XCTAssertEqual(data.billingAddress?.street, "Address")
+            XCTAssertEqual(data.billingAddress?.stateOrProvince, "AL")
+            XCTAssertEqual(data.billingAddress?.city, "City")
+            XCTAssertEqual(data.billingAddress?.country, "US")
+            XCTAssertEqual(data.billingAddress?.postalCode, "Postal Code")
+
             sut.stopLoadingIfNeeded()
             delegateExpectation.fulfill()
-            XCTAssertEqual(sut.viewController.view.isUserInteractionEnabled, true)
-            XCTAssertEqual(sut.button.showsActivityIndicator, false)
+            XCTAssertEqual(sut.cardViewController.view.isUserInteractionEnabled, true)
+            XCTAssertEqual(sut.cardViewController.button.showsActivityIndicator, false)
         }
 
         UIApplication.shared.keyWindow?.rootViewController = sut.viewController
 
         let cardNumberItemView: FormTextItemView<FormCardNumberItem>? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.numberItem")
-
         let expiryDateItemView: FormTextItemView<FormTextInputItem>? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.expiryDateItem")
-
         let securityCodeItemView: FormTextItemView<FormCardSecurityCodeItem>? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.securityCodeItem")
-
         let payButtonItemViewButton: UIControl? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.payButtonItem.button")
+        let storeDetailsItemView: FormSwitchItemView? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.storeDetailsItem")
+
+        let houseNumberItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.houseNumberOrName")
+        let addressItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.street")
+        let cityItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.city")
+        let postalCodeItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.postalCode")
 
         let expectation = XCTestExpectation(description: "Dummy Expectation")
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
@@ -690,20 +712,290 @@ class CardComponentTests: XCTestCase {
             self.populate(textItemView: expiryDateItemView!, with: "03/30")
             self.populate(textItemView: securityCodeItemView!, with: "737")
 
+            self.populate(textItemView: houseNumberItemView!, with: "House Number")
+            self.populate(textItemView: addressItemView!, with: "Address")
+            self.populate(textItemView: cityItemView!, with: "City")
+            self.populate(textItemView: postalCodeItemView!, with: "Postal Code")
+
+            _ = storeDetailsItemView!.accessibilityActivate()
+
             payButtonItemViewButton?.sendActions(for: .touchUpInside)
 
             expectation.fulfill()
         }
         waitForExpectations(timeout: 10, handler: nil)
     }
+
+    func testDateShouldPassFocusToCVC() {
+        let method = CardPaymentMethod(type: "bcmc", name: "Test name", fundingSource: .credit, brands: ["visa", "amex", "mc"])
+        let sut = CardComponent(paymentMethod: method,
+                                clientKey: Dummy.dummyClientKey)
+        UIApplication.shared.keyWindow?.rootViewController = sut.viewController
+
+        let expiryDateItemView: FormTextItemView<FormTextInputItem>? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.expiryDateItem")
+        let securityCodeItemView: FormTextItemView<FormCardSecurityCodeItem>? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.securityCodeItem")
+
+        let expectation = XCTestExpectation(description: "Dummy Expectation")
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
+            expiryDateItemView?.becomeFirstResponder()
+            self.append(textItemView: expiryDateItemView!, with: "3")
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(2)) {
+                XCTAssertTrue(expiryDateItemView!.textField.isFirstResponder)
+                self.append(textItemView: expiryDateItemView!, with: "3")
+                self.append(textItemView: expiryDateItemView!, with: "0")
+
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
+                    XCTAssertTrue(securityCodeItemView!.textField.isFirstResponder)
+                    XCTAssertFalse(expiryDateItemView!.textField.isFirstResponder)
+
+                    expectation.fulfill()
+                }
+            }
+        }
+        wait(for: [expectation], timeout: 10)
+    }
+
+    func testAddressNL() {
+        let method = CardPaymentMethod(type: "bcmc", name: "Test name", fundingSource: .credit, brands: ["visa", "amex", "mc"])
+        var config = CardComponent.Configuration()
+        config.billingAddressMode = .full
+        let sut = CardComponent(paymentMethod: method,
+                                configuration: config,
+                                clientKey: Dummy.dummyClientKey)
+        sut.payment = .init(amount: Payment.Amount(value: 100, currencyCode: "USD"), countryCode: "NL")
+        UIApplication.shared.keyWindow?.rootViewController = sut.viewController
+
+        let expectation = XCTestExpectation(description: "Dummy Expectation")
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
+
+            let houseNumberItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.houseNumberOrName")
+            let countryItemView: FormRegionPickerItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.country")
+            let addressItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.street")
+            let apartmentSuiteItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.appartment")
+            let cityItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.city")
+            let provinceOrTerritoryItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.stateOrProvince")
+            let postalCodeItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.postalCode")
+            let headerItemView: UILabel? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.title")
+
+            XCTAssertEqual(countryItemView!.titleLabel.text, "Country")
+            XCTAssertEqual(countryItemView!.inputControl.label, "Netherlands")
+            XCTAssertEqual(houseNumberItemView!.titleLabel.text, "House number")
+            XCTAssertEqual(addressItemView!.titleLabel.text, "Street")
+            XCTAssertEqual(apartmentSuiteItemView!.titleLabel.text, "Apartment / Suite (optional)")
+            XCTAssertEqual(cityItemView!.titleLabel.text, "City")
+            XCTAssertEqual(provinceOrTerritoryItemView!.titleLabel.text, "Province or Territory")
+            XCTAssertEqual(postalCodeItemView!.titleLabel.text, "Postal code")
+            XCTAssertEqual(headerItemView!.text, "Billing address")
+
+            XCTAssertTrue(houseNumberItemView!.alertLabel.isHidden)
+            XCTAssertTrue(addressItemView!.alertLabel.isHidden)
+            XCTAssertTrue(apartmentSuiteItemView!.alertLabel.isHidden)
+            XCTAssertTrue(cityItemView!.alertLabel.isHidden)
+            XCTAssertTrue(provinceOrTerritoryItemView!.alertLabel.isHidden)
+            XCTAssertTrue(postalCodeItemView!.alertLabel.isHidden)
+
+            let payButtonItemViewButton: UIControl? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.payButtonItem.button")
+            payButtonItemViewButton?.sendActions(for: .touchUpInside)
+
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
+                XCTAssertFalse(houseNumberItemView!.alertLabel.isHidden)
+                XCTAssertFalse(addressItemView!.alertLabel.isHidden)
+                XCTAssertTrue(apartmentSuiteItemView!.alertLabel.isHidden)
+                XCTAssertFalse(cityItemView!.alertLabel.isHidden)
+                XCTAssertFalse(provinceOrTerritoryItemView!.alertLabel.isHidden)
+                XCTAssertFalse(postalCodeItemView!.alertLabel.isHidden)
+
+                expectation.fulfill()
+            }
+        }
+
+        wait(for: [expectation], timeout: 10)
+    }
+
+    func testAddressUS() {
+        let method = CardPaymentMethod(type: "bcmc", name: "Test name", fundingSource: .credit, brands: ["visa", "amex", "mc"])
+        var config = CardComponent.Configuration()
+        config.billingAddressMode = .full
+        let sut = CardComponent(paymentMethod: method,
+                                configuration: config,
+                                clientKey: Dummy.dummyClientKey)
+        sut.payment = .init(amount: Payment.Amount(value: 100, currencyCode: "USD"), countryCode: "US")
+        UIApplication.shared.keyWindow?.rootViewController = sut.viewController
+
+        let expectation = XCTestExpectation(description: "Dummy Expectation")
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
+
+            let houseNumberItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.houseNumberOrName")
+            let countryItemView: FormRegionPickerItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.country")
+            let addressItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.street")
+            let apartmentSuiteItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.appartment")
+            let cityItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.city")
+            let provinceOrTerritoryItemView: FormRegionPickerItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.stateOrProvince")
+            let postalCodeItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.postalCode")
+            let headerItemView: UILabel? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.title")
+
+            XCTAssertNil(apartmentSuiteItemView)
+
+            XCTAssertEqual(countryItemView!.titleLabel.text, "Country")
+            XCTAssertEqual(countryItemView!.inputControl.label, "United States")
+            XCTAssertEqual(houseNumberItemView!.titleLabel.text, "Apartment / Suite (optional)")
+            XCTAssertEqual(addressItemView!.titleLabel.text, "Address")
+            XCTAssertEqual(cityItemView!.titleLabel.text, "City")
+            XCTAssertEqual(provinceOrTerritoryItemView!.titleLabel.text, "State")
+            XCTAssertEqual(postalCodeItemView!.titleLabel.text, "Zip code")
+            XCTAssertEqual(headerItemView!.text, "Billing address")
+
+            XCTAssertTrue(houseNumberItemView!.alertLabel.isHidden)
+            XCTAssertTrue(addressItemView!.alertLabel.isHidden)
+            XCTAssertTrue(cityItemView!.alertLabel.isHidden)
+            XCTAssertTrue(postalCodeItemView!.alertLabel.isHidden)
+
+            let payButtonItemViewButton: UIControl? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.payButtonItem.button")
+            payButtonItemViewButton?.sendActions(for: .touchUpInside)
+
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
+                XCTAssertTrue(houseNumberItemView!.alertLabel.isHidden)
+                XCTAssertFalse(addressItemView!.alertLabel.isHidden)
+                XCTAssertFalse(cityItemView!.alertLabel.isHidden)
+                XCTAssertFalse(postalCodeItemView!.alertLabel.isHidden)
+
+                expectation.fulfill()
+            }
+        }
+
+        wait(for: [expectation], timeout: 10)
+    }
+
+    func testAddressSelectCountry() {
+        let method = CardPaymentMethod(type: "bcmc", name: "Test name", fundingSource: .credit, brands: ["visa", "amex", "mc"])
+        var config = CardComponent.Configuration()
+        config.billingAddressMode = .full
+        let sut = CardComponent(paymentMethod: method,
+                                configuration: config,
+                                clientKey: Dummy.dummyClientKey)
+        sut.payment = .init(amount: Payment.Amount(value: 100, currencyCode: "USD"), countryCode: "CA")
+        UIApplication.shared.keyWindow?.rootViewController = sut.viewController
+
+        let expectation = XCTestExpectation(description: "Dummy Expectation")
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
+
+            var houseNumberItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.houseNumberOrName")
+            var countryItemView: FormRegionPickerItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.country")
+            var addressItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.street")
+            var apartmentSuiteItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.appartment")
+            var cityItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.city")
+            var provinceOrTerritoryItemView: FormRegionPickerItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.stateOrProvince")
+            var postalCodeItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.postalCode")
+
+            XCTAssertNil(apartmentSuiteItemView)
+
+            XCTAssertEqual(countryItemView!.titleLabel.text, "Country")
+            XCTAssertEqual(countryItemView!.inputControl.label, "Canada")
+            XCTAssertEqual(houseNumberItemView!.titleLabel.text, "Apartment / Suite (optional)")
+            XCTAssertEqual(addressItemView!.titleLabel.text, "Address")
+            XCTAssertEqual(cityItemView!.titleLabel.text, "City")
+            XCTAssertEqual(provinceOrTerritoryItemView!.titleLabel.text, "Province or Territory")
+            XCTAssertEqual(postalCodeItemView!.titleLabel.text, "Postal code")
+            XCTAssertNil(apartmentSuiteItemView)
+
+            countryItemView!.item.value = countryItemView!.item.selectableValues.first { $0.identifier == "BR" }!
+
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
+
+                houseNumberItemView = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.houseNumberOrName")
+                countryItemView = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.country")
+                addressItemView = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.street")
+                apartmentSuiteItemView = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.appartment")
+                cityItemView = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.city")
+                provinceOrTerritoryItemView = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.stateOrProvince")
+                postalCodeItemView = sut.viewController.view.findView(with: "Adyen.FullFormAddressItem.postalCode")
+
+                XCTAssertEqual(countryItemView!.titleLabel.text, "Country")
+                XCTAssertEqual(countryItemView!.inputControl.label, "Brazil")
+                XCTAssertEqual(houseNumberItemView!.titleLabel.text, "House number")
+                XCTAssertEqual(addressItemView!.titleLabel.text, "Street")
+                XCTAssertEqual(cityItemView!.titleLabel.text, "City")
+                XCTAssertEqual(provinceOrTerritoryItemView!.titleLabel.text, "State")
+                XCTAssertEqual(postalCodeItemView!.titleLabel.text, "Postal code")
+                XCTAssertEqual(apartmentSuiteItemView!.titleLabel.text, "Apartment / Suite (optional)")
+
+                expectation.fulfill()
+            }
+        }
+
+        wait(for: [expectation], timeout: 10)
+    }
+
+    func testPostalCode() {
+        let cardPublicKey = Dummy.dummyPublicKey
+        let cardPublicKeyProvider = CardPublicKeyProvider(cardPublicKey: cardPublicKey)
+        let method = CardPaymentMethod(type: "bcmc", name: "Test name", fundingSource: .credit, brands: ["visa", "amex", "mc"])
+        var config = CardComponent.Configuration()
+        config.billingAddressMode = .postalCode
+        let sut = CardComponent(paymentMethod: method,
+                                configuration: config,
+                                clientKey: Dummy.dummyClientKey)
+        sut.cardPublicKeyProvider = cardPublicKeyProvider
+        sut.payment = .init(amount: Payment.Amount(value: 100, currencyCode: "USD"), countryCode: "US")
+        UIApplication.shared.keyWindow?.rootViewController = sut.viewController
+
+        let delegate = PaymentComponentDelegateMock()
+        sut.delegate = delegate
+
+        let delegateExpectation = expectation(description: "PaymentComponentDelegate must be called when submit button is clicked.")
+        delegate.onDidFail = { error, component in XCTFail("should not fail") }
+        delegate.onDidSubmit = { data, component in
+            XCTAssertTrue(component === sut)
+            XCTAssertTrue(data.paymentMethod is CardDetails)
+
+            XCTAssertNil(data.billingAddress?.apartment)
+            XCTAssertNil(data.billingAddress?.houseNumberOrName)
+            XCTAssertNil(data.billingAddress?.street)
+            XCTAssertNil(data.billingAddress?.stateOrProvince)
+            XCTAssertNil(data.billingAddress?.city)
+            XCTAssertNil(data.billingAddress?.country)
+            XCTAssertEqual(data.billingAddress?.postalCode, "12345")
+
+            sut.stopLoadingIfNeeded()
+            delegateExpectation.fulfill()
+        }
+
+        let expectation = XCTestExpectation(description: "Dummy Expectation")
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
+
+            let cardNumberItemView: FormTextItemView<FormCardNumberItem>? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.numberItem")
+            let expiryDateItemView: FormTextItemView<FormTextInputItem>? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.expiryDateItem")
+            let securityCodeItemView: FormTextItemView<FormCardSecurityCodeItem>? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.securityCodeItem")
+            let postalCodeItemView: FormTextInputItemView? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.postalCodeItem")
+            XCTAssertEqual(postalCodeItemView!.titleLabel.text, "Postal code")
+            XCTAssertTrue(postalCodeItemView!.alertLabel.isHidden)
+
+            self.populate(textItemView: cardNumberItemView!, with: "4917 6100 0000 0000")
+            self.populate(textItemView: expiryDateItemView!, with: "03/30")
+            self.populate(textItemView: securityCodeItemView!, with: "737")
+            self.populate(textItemView: postalCodeItemView!, with: "12345")
+
+            let payButtonItemViewButton: UIControl? = sut.viewController.view.findView(with: "AdyenCard.CardComponent.payButtonItem.button")
+            payButtonItemViewButton?.sendActions(for: .touchUpInside)
+
+            expectation.fulfill()
+        }
+
+        waitForExpectations(timeout: 30, handler: nil)
+    }
     
     private func focus<T: FormTextItem, U: FormTextItemView<T>>(textItemView: U) {
         textItemView.textField.becomeFirstResponder()
     }
-    
-    private func populate<T: FormTextItem, U: FormTextItemView<T>>(textItemView: U, with text: String) {
-        let textView = textItemView.textField
-        textView.text = text
-        textView.sendActions(for: .editingChanged)
+}
+
+extension UIView {
+
+    func printForTesting(indent: String) {
+        print("\(indent) \(self.accessibilityIdentifier ?? "\(String(describing: type(of: self)))")")
+        for view in self.subviews {
+            print(view.printForTesting(indent: indent + " -"))
+        }
     }
+
 }

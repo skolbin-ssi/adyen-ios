@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -8,14 +8,9 @@ import Adyen
 import Foundation
 
 /// A component that handles Await action's.
-internal protocol AnyAwaitActionHandler: ActionComponent, Cancellable {
-    func handle(_ action: AwaitAction)
-}
-
-/// A component that handles Await action's.
-public final class AwaitComponent: AnyAwaitActionHandler {
+public final class AwaitComponent: ActionComponent, Cancellable {
     
-    /// Delegates `ViewController`'s presentation.
+    /// Delegates `PresentableComponent`'s presentation.
     public weak var presentationDelegate: PresentationDelegate?
     
     /// :nodoc:
@@ -31,7 +26,7 @@ public final class AwaitComponent: AnyAwaitActionHandler {
     public var localizationParameters: LocalizationParameters?
     
     /// :nodoc:
-    private var awaitActionHandler: AnyAwaitActionHandlerProvider?
+    private var awaitActionHandler: AnyPollingHandlerProvider?
     
     /// Initializes the `AwaitComponent`.
     ///
@@ -44,7 +39,7 @@ public final class AwaitComponent: AnyAwaitActionHandler {
     ///
     /// - Parameter awaitComponentBuilder: The payment method specific await action handler provider.
     /// - Parameter style: The Component UI style.
-    internal convenience init(awaitComponentBuilder: AnyAwaitActionHandlerProvider?,
+    internal convenience init(awaitComponentBuilder: AnyPollingHandlerProvider?,
                               style: AwaitComponentStyle?) {
         self.init(style: style)
         self.awaitActionHandler = awaitComponentBuilder
@@ -67,23 +62,24 @@ public final class AwaitComponent: AnyAwaitActionHandler {
             let presentableComponent = PresentableComponentWrapper(component: self, viewController: viewController)
             presentationDelegate.present(component: presentableComponent)
         } else {
-            assertionFailure("presentationDelegate is nil, please provide a presentation delegate to present the AwaitComponent UI.")
+            let message = "PresentationDelegate is nil. Provide a presentation delegate to AwaitComponent."
+            AdyenAssertion.assert(message: message)
         }
         
-        let awaitComponentBuilder = self.awaitActionHandler ?? AwaitActionHandlerProvider(environment: environment, apiClient: nil)
+        let awaitComponentBuilder = self.awaitActionHandler ?? PollingHandlerProvider(environment: environment, apiClient: nil)
         
-        paymentMethodSpecificAwaitComponent = awaitComponentBuilder.handler(for: action.paymentMethodType)
-        paymentMethodSpecificAwaitComponent?.delegate = delegate
+        paymentMethodSpecificPollingComponent = awaitComponentBuilder.handler(for: action.paymentMethodType)
+        paymentMethodSpecificPollingComponent?.delegate = delegate
         
-        paymentMethodSpecificAwaitComponent?.handle(action)
+        paymentMethodSpecificPollingComponent?.handle(action)
     }
     
     /// :nodoc:
     public func didCancel() {
-        paymentMethodSpecificAwaitComponent?.didCancel()
+        paymentMethodSpecificPollingComponent?.didCancel()
     }
     
     /// :nodoc:
-    private var paymentMethodSpecificAwaitComponent: AnyAwaitActionHandler?
+    private var paymentMethodSpecificPollingComponent: AnyPollingHandler?
     
 }

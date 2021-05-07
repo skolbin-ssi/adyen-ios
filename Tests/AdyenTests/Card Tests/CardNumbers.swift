@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -49,7 +49,8 @@ struct CardNumbers {
     ]
     
     static let diners = [
-        "36006666333344" // US
+        "36006666333344", // US
+        "30000000000004"
     ]
     
     static let discover = [

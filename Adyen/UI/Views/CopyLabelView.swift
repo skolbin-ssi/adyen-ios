@@ -17,12 +17,7 @@ public final class CopyLabelView: UIView, Localizable {
     private let text: String
 
     private lazy var label: UILabel = {
-        let label = UILabel()
-        label.font = style.font
-        label.adjustsFontForContentSizeCategory = true
-        label.textColor = style.color
-        label.textAlignment = style.textAlignment
-        label.backgroundColor = style.backgroundColor
+        let label = UILabel(style: style)
         label.text = text
         label.isAccessibilityElement = false
         label.accessibilityIdentifier = ViewIdentifierBuilder.build(scopeInstance: self, postfix: "textLabel")
@@ -37,7 +32,7 @@ public final class CopyLabelView: UIView, Localizable {
         super.init(frame: .zero)
         addSubview(label)
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.adyen.anchore(inside: self)
+        label.adyen.anchor(inside: self)
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         addGestureRecognizer(tapGesture)
 
@@ -62,7 +57,7 @@ public final class CopyLabelView: UIView, Localizable {
         guard let superview = superview else { return }
         becomeFirstResponder()
         let menuController = UIMenuController.shared
-        let copyItem = UIMenuItem(title: ADYLocalizedString("adyen.button.copy", localizationParameters), action: #selector(handleCopy))
+        let copyItem = UIMenuItem(title: localizedString(.buttonCopy, localizationParameters), action: #selector(handleCopy))
         menuController.menuItems = [copyItem]
         menuController.setTargetRect(frame, in: superview)
         menuController.setMenuVisible(true, animated: true)

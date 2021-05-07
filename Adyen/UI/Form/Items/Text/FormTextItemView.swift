@@ -8,7 +8,7 @@ import UIKit
 
 /// The interface of the delegate of a text item view.
 /// :nodoc:
-public protocol FormTextItemViewDelegate: FormValueItemViewDelegate {
+public protocol FormTextItemViewDelegate: AnyObject {
     
     /// Invoked when the text entered in the item view's text field has reached the maximum length.
     ///
@@ -22,24 +22,34 @@ public protocol FormTextItemViewDelegate: FormValueItemViewDelegate {
     
 }
 
+/// Defines any form text item view.
+/// :nodoc:
+public protocol AnyFormTextItemView: AnyFormItemView {
+
+    /// Delegate text related events.
+    var delegate: FormTextItemViewDelegate? { get set }
+}
+
 /// A view representing a basic logic of text item.
 /// :nodoc:
-open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldDelegate where T.ValueType == String {
+open class FormTextItemView<ItemType: FormTextItem>: FormValueItemView<String, FormTextItemStyle, ItemType>,
+    UITextFieldDelegate,
+    AnyFormTextItemView {
     
     /// Initializes the text item view.
     ///
     /// - Parameter item: The item represented by the view.
-    public required init(item: T) {
+    public required init(item: ItemType) {
         super.init(item: item)
+
+        bind(item.$placeholder, to: textField, at: \.placeholder)
         
         addSubview(textStackView)
-        
         configureConstraints()
     }
-    
-    private var textDelegate: FormTextItemViewDelegate? {
-        delegate as? FormTextItemViewDelegate
-    }
+
+    /// Delegate text related events.
+    public weak var delegate: FormTextItemViewDelegate?
     
     // MARK: - Stack View
     
@@ -75,23 +85,6 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
         return stackView
     }()
     
-    // MARK: - Title Label
-
-    /// :nodoc:
-    public lazy var titleLabel: UILabel = {
-        let titleLabel = UILabel()
-        titleLabel.font = item.style.title.font
-        titleLabel.adjustsFontForContentSizeCategory = true
-        titleLabel.textColor = item.style.title.color
-        titleLabel.textAlignment = item.style.title.textAlignment
-        titleLabel.backgroundColor = item.style.title.backgroundColor
-        titleLabel.text = item.title
-        titleLabel.isAccessibilityElement = false
-        titleLabel.accessibilityIdentifier = item.identifier.map { ViewIdentifierBuilder.build(scopeInstance: $0, postfix: "titleLabel") }
-        
-        return titleLabel
-    }()
-    
     // MARK: - Text Field
     
     public lazy var textField: UITextField = {
@@ -117,15 +110,10 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
     
     // MARK: - Alert Label
     
-    private lazy var alertLabel: UILabel = {
-        let alertLabel = UILabel()
-        alertLabel.font = item.style.title.font
-        alertLabel.adjustsFontForContentSizeCategory = true
-        alertLabel.textColor = item.style.errorColor
-        alertLabel.textAlignment = item.style.title.textAlignment
-        alertLabel.backgroundColor = item.style.title.backgroundColor
-        alertLabel.text = item.validationFailureMessage
+    internal lazy var alertLabel: UILabel = {
+        let alertLabel = UILabel(style: item.style.title)
         alertLabel.isAccessibilityElement = false
+        alertLabel.text = item.validationFailureMessage
         alertLabel.accessibilityIdentifier = item.identifier.map { ViewIdentifierBuilder.build(scopeInstance: $0, postfix: "alertLabel") }
         alertLabel.isHidden = true
         
@@ -197,14 +185,12 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
         let newText = textField.text
         var sanitizedText = newText.map { item.formatter?.sanitizedValue(for: $0) ?? $0 } ?? ""
         let maximumLength = item.validator?.maximumLength(for: sanitizedText) ?? .max
-        sanitizedText = sanitizedText.truncate(to: maximumLength)
+        sanitizedText = sanitizedText.adyen.truncate(to: maximumLength)
         
         item.value = sanitizedText
         
-        textDelegate?.didChangeValue(in: self)
-        
         if sanitizedText.count == maximumLength {
-            textDelegate?.didReachMaximumLength(in: self)
+            delegate?.didReachMaximumLength(in: self)
         }
         
         if let formatter = item.formatter, let newText = newText {
@@ -241,7 +227,7 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
     }
     
     private func configureConstraints() {
-        textStackView.adyen.anchore(inside: self)
+        textStackView.adyen.anchor(inside: self)
         separatorView.bottomAnchor.constraint(equalTo: accessoryStackView.bottomAnchor, constant: 4).isActive = true
     }
     
@@ -277,7 +263,7 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
     
     /// :nodoc:
     public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textDelegate?.didSelectReturnKey(in: self)
+        delegate?.didSelectReturnKey(in: self)
         return true
     }
     
@@ -317,20 +303,7 @@ open class FormTextItemView<T: FormTextItem>: FormValueItemView<T>, UITextFieldD
     
     private func hideAlertLabel(_ hidden: Bool) {
         guard hidden || alertLabel.text != nil else { return }
-        UIView.animateKeyframes(withDuration: 0.25,
-                                delay: 0,
-                                options: [.calculationModeLinear],
-                                animations: {
-                                    UIView.addKeyframe(withRelativeStartTime: hidden ? 0.5 : 0, relativeDuration: 0.5) {
-                                        self.alertLabel.isHidden = hidden
-                                    }
-                                    
-                                    UIView.addKeyframe(withRelativeStartTime: hidden ? 0 : 0.5, relativeDuration: 0.5) {
-                                        self.alertLabel.alpha = hidden ? 0 : 1
-                                    }
-                                }, completion: { _ in
-                                    self.alertLabel.isHidden = hidden
-                                })
+        alertLabel.adyen.hideWithAnimation(hidden)
     }
 }
 

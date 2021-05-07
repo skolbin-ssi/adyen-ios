@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -8,7 +8,7 @@ import Adyen
 import UIKit
 
 /// A form item into which a card number is entered.
-internal final class FormCardNumberItem: FormTextItem {
+internal final class FormCardNumberItem: FormTextItem, Observer {
     
     private static let binLength = 12
 
@@ -29,37 +29,38 @@ internal final class FormCardNumberItem: FormTextItem {
     
     /// Initializes the form card number item.
     internal init(supportedCardTypes: [CardType],
-                  environment: Environment,
+                  logoProvider: LogoURLProvider,
                   style: FormTextItemStyle = FormTextItemStyle(),
                   localizationParameters: LocalizationParameters? = nil) {
         self.supportedCardTypes = supportedCardTypes
         
         self.cardTypeLogos = supportedCardTypes.map {
-            CardTypeLogo(url: LogoURLProvider.logoURL(withName: $0.rawValue, environment: environment),
-                         type: $0)
+            CardTypeLogo(url: logoProvider.logoURL(withName: $0.rawValue), type: $0)
         }
         self.localizationParameters = localizationParameters
         
-        self.style = style
+        super.init(style: style)
+
+        observe(publisher) { [weak self] value in self?.valueDidChange(value) }
         
-        title = ADYLocalizedString("adyen.card.numberItem.title", localizationParameters)
+        title = localizedString(.cardNumberItemTitle, localizationParameters)
         validator = CardNumberValidator()
         formatter = cardNumberFormatter
-        placeholder = ADYLocalizedString("adyen.card.numberItem.placeholder", localizationParameters)
-        validationFailureMessage = ADYLocalizedString("adyen.card.numberItem.invalid", localizationParameters)
+        placeholder = localizedString(.cardNumberItemPlaceholder, localizationParameters)
+        validationFailureMessage = localizedString(.cardNumberItemInvalid, localizationParameters)
         keyboardType = .numberPad
     }
     
     // MARK: - Value
     
-    internal func valueDidChange() {
+    internal func valueDidChange(_ value: String) {
         binValue = String(value.prefix(FormCardNumberItem.binLength))
         cardNumberFormatter.cardType = supportedCardTypes.adyen.type(forCardNumber: value)
     }
     
     // MARK: - BuildableFormItem
     
-    internal func build(with builder: FormItemViewBuilder) -> AnyFormItemView {
+    override internal func build(with builder: FormItemViewBuilder) -> AnyFormItemView {
         builder.build(with: self)
     }
     

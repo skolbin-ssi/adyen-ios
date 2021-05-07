@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -15,7 +15,7 @@ public final class IBANFormatter: Formatter {
     /// :nodoc:
     public func formattedValue(for value: String) -> String {
         // Sanitize the string first, then group it into sets of 4.
-        sanitizedValue(for: value).components(withLength: 4).joined(separator: " ")
+        sanitizedValue(for: value).adyen.components(withLength: 4).joined(separator: " ")
     }
     
     /// :nodoc:

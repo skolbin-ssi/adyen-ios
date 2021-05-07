@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -29,6 +29,52 @@ class ActionTests: XCTestCase {
         XCTAssertNotNil(redirectAction)
         XCTAssertEqual(redirectAction?.url.absoluteString, "https://example.org/")
         XCTAssertEqual(redirectAction?.paymentData, "example_data")
+    }
+    
+    func testQRCodeActionDecoding() {
+        let json =
+            """
+            {
+                "type": "qrCode",
+                "qrCodeData": "example_data",
+                "paymentData": "example_data",
+                "paymentMethodType": "pix"
+            }
+            """
+        
+        let action = try? JSONDecoder().decode(Action.self, from: json.data(using: .utf8)!)
+        
+        var qrCodeAction: QRCodeAction?
+        if case let .qrCode(qrCode)? = action {
+            qrCodeAction = qrCode
+        }
+
+        XCTAssertNotNil(qrCodeAction)
+        XCTAssertEqual(qrCodeAction?.paymentData, "example_data")
+        XCTAssertTrue(qrCodeAction?.paymentMethodType == .some(.pix))
+    }
+    
+    func testQRCodeToRedirectActionDecoding() {
+        let json =
+            """
+            {
+                "type": "qrCode",
+                "url": "https://example.org/",
+                "paymentData": "example_data",
+                "paymentMethodType": "bcmc_mobile"
+            }
+            """
+        
+        let action = try? JSONDecoder().decode(Action.self, from: json.data(using: .utf8)!)
+        
+        var qrToRedirectAction: RedirectAction?
+        if case let .redirect(redirect)? = action {
+            qrToRedirectAction = redirect
+        }
+        
+        XCTAssertNotNil(qrToRedirectAction)
+        XCTAssertEqual(qrToRedirectAction?.url.absoluteString, "https://example.org/")
+        XCTAssertEqual(qrToRedirectAction?.paymentData, "example_data")
     }
     
     func test3DS2FingerprintActionDecoding() {

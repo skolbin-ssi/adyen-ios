@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -58,7 +58,7 @@ internal final class AwaitViewController: UIViewController {
             guid = view.safeAreaLayoutGuide
         }
         
-        containerView.adyen.anchore(inside: guid)
+        containerView.adyen.anchor(inside: guid)
         let constraints = [
             awaitView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             
@@ -83,7 +83,7 @@ internal final class AwaitViewController: UIViewController {
         }
         
         // swiftlint:disable:next unused_setter_value
-        set { assertionFailure("""
+        set { AdyenAssertion.assert(message: """
         PreferredContentSize is overridden for this view controller.
         getter - returns minimum possible content size.
         setter - no implemented.

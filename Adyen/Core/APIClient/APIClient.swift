@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -43,22 +43,17 @@ public final class APIClient: APIClientProtocol {
     /// :nodoc:
     public func perform<R: Request>(_ request: R, completionHandler: @escaping CompletionHandler<R.ResponseType>) {
         let url = environment.baseURL.appendingPathComponent(request.path)
-        let body: Data
-        do {
-            body = try Coder.encode(request)
-        } catch {
-            completionHandler(.failure(error))
-            
-            return
-        }
-        
+
         var urlRequest = URLRequest(url: add(queryParameters: request.queryParameters + environment.queryParameters, to: url))
         urlRequest.httpMethod = request.method.rawValue
-        if request.method == .post {
-            urlRequest.httpBody = body
-        }
-        
         urlRequest.allHTTPHeaderFields = request.headers.merging(environment.headers, uniquingKeysWith: { key1, _ in key1 })
+        if request.method == .post {
+            do {
+                urlRequest.httpBody = try Coder.encode(request)
+            } catch {
+                return completionHandler(.failure(error))
+            }
+        }
 
         log(urlRequest: urlRequest, request: request)
         
@@ -122,7 +117,16 @@ public final class APIClient: APIClientProtocol {
     
     /// :nodoc:
     private lazy var urlSession: URLSession = {
-        URLSession(configuration: .default, delegate: nil, delegateQueue: .main)
+        let config = URLSessionConfiguration.ephemeral
+        config.urlCache = nil
+
+        if #available(iOS 13.0, *) {
+            config.tlsMinimumSupportedProtocolVersion = .TLSv12
+        } else {
+            config.tlsMinimumSupportedProtocol = .tlsProtocol12
+        }
+
+        return URLSession(configuration: config, delegate: nil, delegateQueue: .main)
     }()
     
     /// :nodoc:

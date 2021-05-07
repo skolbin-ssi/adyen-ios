@@ -6,36 +6,22 @@
 
 import UIKit
 
-/// :nodoc:
-/// Delegate to handle different viewController events.
-public protocol ViewControllerDelegate: AnyObject {
-    
-    /// :nodoc:
-    /// Handles the UIViewController.viewDidLoad() event.
-    func viewDidLoad(viewController: UIViewController)
-
-    /// :nodoc:
-    /// Handles the UIViewController.viewDidAppear() event.
-    func viewDidAppear(viewController: UIViewController)
-    
-}
-
 /// Displays a form for the user to enter details.
 /// :nodoc:
 @objc(ADYFormViewController)
-public final class FormViewController: UIViewController, Localizable {
-    
-    private lazy var itemManager = FormViewItemManager(itemViewDelegate: self)
-    
+open class FormViewController: UIViewController, Localizable, KeyboardObserver, Observer, PreferredContentSizeConsumer {
+
     /// :nodoc:
     public var requiresKeyboardInput: Bool { formRequiresInputView() }
-    
+
     /// Indicates the `FormViewController` UI styling.
     public let style: ViewStyle
-    
+
     /// :nodoc:
     /// Delegate to handle different viewController events.
     public weak var delegate: ViewControllerDelegate?
+
+    // MARK: - Public
     
     /// Initializes the FormViewController.
     ///
@@ -43,48 +29,91 @@ public final class FormViewController: UIViewController, Localizable {
     public init(style: ViewStyle) {
         self.style = style
         super.init(nibName: nil, bundle: nil)
+        startObserving()
     }
-    
+
+    deinit {
+        stopObserving()
+    }
+
     @available(*, unavailable)
-    internal required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    // MARK: - Public
     
     /// :nodoc:
     override public var preferredContentSize: CGSize {
         get { formView.intrinsicContentSize }
         
         // swiftlint:disable:next unused_setter_value
-        set { assertionFailure("""
+        set { AdyenAssertion.assert(message: """
         PreferredContentSize is overridden for this view controller.
         getter - returns minimum possible content size.
         setter - no implemented.
         """) }
     }
+
+    // MARK: - KeyboardObserver
+
+    /// :nodoc:
+    public var keyboardObserver: Any?
+
+    /// :nodoc:
+    public func startObserving() {
+        keyboardObserver = startObserving { [weak self] in
+            self?.keyboardRect = $0
+            self?.didUpdatePreferredContentSize()
+        }
+    }
+
+    private var keyboardRect: CGRect = .zero
+
+    private func updateScrollViewInsets(keyboardHeight: CGFloat) {
+        formView.contentInset.bottom = keyboardHeight
+    }
+
+    // MARK: - Private Properties
+
+    private lazy var itemManager = FormViewItemManager()
+
+    // MARK: - PreferredContentSizeConsumer
+
+    /// :nodoc:
+    public func willUpdatePreferredContentSize() { /* Empty implementation */ }
+
+    /// :nodoc:
+    public func didUpdatePreferredContentSize() {
+        updateScrollViewInsets(keyboardHeight: keyboardRect.height)
+        view.layoutIfNeeded()
+    }
     
     // MARK: - Items
-    
-    /// The items displayed in the form.
-    public var items: [FormItem] {
-        itemManager.items
-    }
     
     /// Appends an item to the form.
     ///
     /// - Parameters:
     ///   - item: The item to append.
-    ///   - itemViewType: Optionally, the item view type to use for this item.
-    ///                   When none is specified, the default will be used.
     public func append<T: FormItem>(_ item: T) {
-        itemManager.append(item)
-        
-        if isViewLoaded, let itemView = itemManager.itemView(for: item) {
-            formView.appendItemView(itemView)
+        let itemView = itemManager.append(item)
+        observerVisibility(of: item, and: itemView)
+        itemView.applyTextDelegateIfNeeded(delegate: self)
+        addItemViewIfNeeded(itemView)
+    }
+
+    private func addItemViewIfNeeded(_ itemView: AnyFormItemView) {
+        guard isViewLoaded else { return }
+        formView.appendItemView(itemView)
+    }
+
+    private func observerVisibility<T: FormItem>(of item: T, and itemView: UIView) {
+        guard let item = item as? Hidable else { return }
+        observe(item.isHidden) { isHidden in
+            itemView.adyen.hideWithAnimation(isHidden)
         }
     }
-    
+
+    // MARK: - Localizable
+
     /// :nodoc:
     public var localizationParameters: LocalizationParameters?
     
@@ -100,7 +129,7 @@ public final class FormViewController: UIViewController, Localizable {
         // Exit when all validations passed.
         guard !isValid else { return true }
         
-        itemManager.allItemViews
+        itemManager.flatItemViews
             .compactMap { $0 as? AnyFormValueItemView }
             .forEach { $0.validate() }
         
@@ -110,46 +139,36 @@ public final class FormViewController: UIViewController, Localizable {
     }
     
     private func getAllValidatableItems() -> [ValidatableFormItem] {
-        let flatItems = getAllFlatItems()
-        return flatItems.compactMap { $0 as? ValidatableFormItem }
+        itemManager.flatItems.compactMap { $0 as? ValidatableFormItem }
     }
     
     private func formRequiresInputView() -> Bool {
-        let flatItems = getAllFlatItems()
-        return flatItems.contains { $0 is InputViewRequiringFormItem }
-    }
-    
-    private func getAllFlatItems() -> [FormItem] {
-        itemManager.items.flatMap(\.flatSubitems)
+        itemManager.flatItems.contains { $0 is InputViewRequiringFormItem }
     }
     
     // MARK: - View
     
     /// :nodoc:
-    override public func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
-        view.addSubview(formView)
-        setupConstraints()
+        addFormView()
         
         delegate?.viewDidLoad(viewController: self)
-        
-        itemManager.itemViews.forEach(formView.appendItemView(_:))
-        
+        itemManager.topLevelItemViews.forEach(formView.appendItemView(_:))
+    }
+
+    private func addFormView() {
+        view.addSubview(formView)
         view.backgroundColor = style.backgroundColor
         formView.backgroundColor = style.backgroundColor
-        
-        let notificationCenter = NotificationCenter.default
-        notificationCenter.addObserver(self,
-                                       selector: #selector(keyboardWillChangeFrame(_:)),
-                                       name: UIResponder.keyboardWillChangeFrameNotification,
-                                       object: nil)
+        formView.adyen.anchor(inside: view.safeAreaLayoutGuide)
     }
     
     /// :nodoc:
-    override public func viewDidAppear(_ animated: Bool) {
+    override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        assignInitialFirstResponder()
         delegate?.viewDidAppear(viewController: self)
+        assignInitialFirstResponder()
     }
     
     private lazy var formView: FormView = {
@@ -157,71 +176,24 @@ public final class FormViewController: UIViewController, Localizable {
         form.translatesAutoresizingMaskIntoConstraints = false
         return form
     }()
-    
-    private var bottomConstraint: NSLayoutConstraint?
-    
-    private func setupConstraints() {
 
-        let constraints: [NSLayoutConstraint?]
-        if #available(iOS 11.0, *) {
-            bottomConstraint = formView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-            constraints = [
-                formView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-                bottomConstraint,
-                formView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
-                formView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor)
-            ]
-        } else {
-            bottomConstraint = formView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            constraints = [
-                formView.topAnchor.constraint(equalTo: view.topAnchor),
-                bottomConstraint,
-                formView.leftAnchor.constraint(equalTo: view.leftAnchor),
-                formView.rightAnchor.constraint(equalTo: view.rightAnchor)
-            ]
-        }
-        
-        bottomConstraint?.priority = .defaultHigh
-        NSLayoutConstraint.activate(constraints.compactMap { $0 })
-    }
-    
-    // MARK: - Keyboard
+    // MARK: - UIResponder
     
     @discardableResult
     override public func resignFirstResponder() -> Bool {
-        let textItemView = itemManager.allItemViews.first(where: { $0.isFirstResponder })
+        let textItemView = itemManager.flatItemViews.first(where: { $0.isFirstResponder })
         textItemView?.resignFirstResponder()
         
         return super.resignFirstResponder()
-    }
-    
-    @objc private func keyboardWillChangeFrame(_ notification: NSNotification) {
-        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
-        var heightOffset = keyboardFrame.origin.y - UIScreen.main.bounds.height
-        
-        if #available(iOS 11.0, *) {
-            heightOffset += min(abs(heightOffset), view.safeAreaInsets.bottom)
-        }
-        
-        bottomConstraint?.constant = heightOffset
     }
     
     // MARK: - Other
     
     private func assignInitialFirstResponder() {
         guard view.isUserInteractionEnabled else { return }
-        let textItemView = itemManager.itemViews.first(where: { $0.canBecomeFirstResponder })
+        let textItemView = itemManager.topLevelItemViews.first(where: { $0.canBecomeFirstResponder })
         textItemView?.becomeFirstResponder()
     }
-}
-
-// MARK: - FormValueItemViewDelegate
-
-extension FormViewController: FormValueItemViewDelegate {
-    
-    /// :nodoc:
-    public func didChangeValue<T: FormValueItem>(in itemView: FormValueItemView<T>) {}
-    
 }
 
 // MARK: - FormTextItemViewDelegate
@@ -239,7 +211,7 @@ extension FormViewController: FormTextItemViewDelegate {
     }
     
     private func handleReturnKey<T: FormTextItem>(from itemView: FormTextItemView<T>) {
-        let itemViews = itemManager.allItemViews
+        let itemViews = itemManager.flatItemViews
         
         // Determine the index of the current item view.
         guard let currentIndex = itemViews.firstIndex(where: { $0 === itemView }) else {

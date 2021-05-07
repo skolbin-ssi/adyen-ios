@@ -8,18 +8,16 @@ import Adyen
 import UIKit
 
 /// A view representing a form card security code item.
-internal final class FormCardSecurityCodeItemView: FormTextItemView<FormCardSecurityCodeItem>, Observer {
+internal final class FormCardSecurityCodeItemView: FormTextItemView<FormCardSecurityCodeItem> {
     
     internal required init(item: FormCardSecurityCodeItem) {
         super.init(item: item)
         accessory = .customView(cardHintView)
         observe(item.$selectedCard) { [weak self] cardsType in
             let number = cardsType == CardType.americanExpress ? "4" : "3"
-            let localization = ADYLocalizedString("adyen.card.cvcItem.placeholder.digits", item.localizationParameters)
-            self?.textField.placeholder = String(format: localization, number)
+            let localization = localizedString(.cardCvcItemPlaceholderDigits, item.localizationParameters, number)
+            self?.textField.placeholder = localization
         }
-
-        bind(item.$title, to: self.titleLabel, at: \.text)
 
         observe(item.$isCVCOptional) { [weak self] _ in
             self?.updateValidationStatus()
@@ -128,7 +126,7 @@ extension FormCardSecurityCodeItemView {
         private func setupConstrints() {
             addSubview(hintImage)
             setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-            hintImage.adyen.anchore(inside: self)
+            hintImage.adyen.anchor(inside: self)
         }
         
         private lazy var hintImage: UIImageView = {

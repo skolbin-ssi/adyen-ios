@@ -61,14 +61,8 @@ public final class SubmitButton: UIControl {
     }
     
     private lazy var titleLabel: UILabel = {
-        let titleLabel = UILabel()
-        titleLabel.font = style.title.font
-        titleLabel.adjustsFontForContentSizeCategory = true
-        titleLabel.textColor = style.title.color
-        titleLabel.backgroundColor = style.title.backgroundColor
-        titleLabel.textAlignment = style.title.textAlignment
+        let titleLabel = UILabel(style: style.title)
         titleLabel.isAccessibilityElement = false
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         return titleLabel
     }()
@@ -120,7 +114,7 @@ public final class SubmitButton: UIControl {
     }
     
     private func configureConstraints() {
-        backgroundView.adyen.anchore(inside: self)
+        backgroundView.adyen.anchor(inside: self)
         
         let constraints = [
             activityIndicatorView.centerXAnchor.constraint(equalTo: centerXAnchor),

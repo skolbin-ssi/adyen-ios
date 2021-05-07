@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -26,23 +26,22 @@ internal final class SlideInPresentationAnimator: NSObject, UIViewControllerAnim
         
         let containerView = transitionContext.containerView
         containerView.addSubview(toShow.view)
-        
-        let preferedFrame = toShow.child.adyen.finalPresentationFrame(in: containerView)
-        toShow.child.view.frame = preferedFrame
         toShow.view.frame.origin.y = containerView.bounds.height
+        toShow.updateFrame(keyboardRect: .zero)
         
-        UIView.animateKeyframes(withDuration: duration, delay: 0.0, options: [], animations: {
-            UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.5) {
-                toHide.view.frame.origin.y = containerView.bounds.height
-            }
-            
-            UIView.addKeyframe(withRelativeStartTime: 0.5, relativeDuration: 0.5) {
-                toShow.view.frame.origin.y = containerView.frame.origin.y
-            }
-            
-        }, completion: { finished in
-            
-            transitionContext.completeTransition(finished)
-        })
+        UIView.animateKeyframes(withDuration: duration,
+                                delay: 0.0,
+                                options: [],
+                                animations: {
+                                    UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.5) {
+                                        toHide.view.frame.origin.y = containerView.bounds.height
+                                    }
+                                    UIView.addKeyframe(withRelativeStartTime: 0.5, relativeDuration: 0.5) {
+                                        toShow.view.frame.origin.y = containerView.frame.origin.y
+                                    }
+                                },
+                                completion: { finished in
+                                    transitionContext.completeTransition(finished)
+                                })
     }
 }

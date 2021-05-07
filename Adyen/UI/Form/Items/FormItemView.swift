@@ -1,24 +1,17 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
 import UIKit
 
-/// The interface of the delegate of an item view.
-/// :nodoc:
-public protocol FormItemViewDelegate: AnyObject {}
-
 /// A view representing a form item.
 /// :nodoc:
-open class FormItemView<ItemType: FormItem>: UIView, AnyFormItemView {
+open class FormItemView<ItemType: FormItem>: UIView, AnyFormItemView, Observer {
     
     /// The item represented by the view.
     public let item: ItemType
-    
-    /// The delegate of the item view.
-    public weak var delegate: FormItemViewDelegate?
     
     /// Initializes the form item view.
     ///
@@ -49,9 +42,6 @@ open class FormItemView<ItemType: FormItem>: UIView, AnyFormItemView {
 /// :nodoc:
 public protocol AnyFormItemView: UIView {
     
-    /// The delegate of the item view.
-    var delegate: FormItemViewDelegate? { get set }
-    
     /// The embedding item view of the current item view.
     var parentItemView: AnyFormItemView? { get }
     
@@ -69,6 +59,11 @@ public extension AnyFormItemView {
         let superviews = sequence(first: superview, next: { $0.superview })
         
         return superviews.first { $0 is AnyFormItemView } as? AnyFormItemView
+    }
+
+    /// The flat list of all sub-itemViews.
+    var flatSubitemViews: [AnyFormItemView] {
+        [self] + childItemViews.flatMap(\.flatSubitemViews)
     }
     
 }

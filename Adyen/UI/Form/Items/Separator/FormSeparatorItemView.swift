@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -36,7 +36,7 @@ internal final class FormSeparatorItemView: FormItemView<FormSeparatorItem> {
     // MARK: - Layout
     
     private func configureConstraints() {
-        separator.adyen.anchore(inside: self)
+        separator.adyen.anchor(inside: self)
         separator.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale).isActive = true
     }
     

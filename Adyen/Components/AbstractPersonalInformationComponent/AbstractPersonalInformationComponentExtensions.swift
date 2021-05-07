@@ -18,21 +18,34 @@ extension AbstractPersonalInformationComponent: LoadingComponent, TrackableCompo
     internal func didSelectSubmitButton() {
         guard formViewController.validate() else { return }
 
-        let details = createPaymentDetails()
-
         button.showsActivityIndicator = true
         formViewController.view.isUserInteractionEnabled = false
 
+        let details = createPaymentDetails()
         submit(data: PaymentComponentData(paymentMethodDetails: details))
     }
 }
 
 /// :nodoc:
-public enum PersonalInformation {
+public enum PersonalInformation: Equatable {
     case firstName
     case lastName
     case email
     case phone
+    case custom(FormItemInjector)
+
+    public static func == (lhs: PersonalInformation, rhs: PersonalInformation) -> Bool {
+        switch (lhs, rhs) {
+        case (.firstName, .firstName),
+             (.lastName, .lastName),
+             (.email, .email),
+             (.phone, .phone),
+             (.custom, .custom):
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 /// :nodoc:

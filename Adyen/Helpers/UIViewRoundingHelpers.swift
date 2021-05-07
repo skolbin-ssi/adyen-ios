@@ -1,14 +1,10 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
 import UIKit
-
-/// So that any `UIView` instance will inherit the `adyen` scope.
-/// :nodoc:
-extension UIView: AdyenCompatible {}
 
 /// Adds helper functionality to any `UIViewController` instance through the `adyen` property.
 /// :nodoc:
@@ -54,6 +50,10 @@ public extension AdyenScope where Base: UIView {
     /// - Parameters:
     ///   - radius: The radius of each corner oval.
     func round(using rounding: CornerRounding) {
+        if #available(iOS 13.0, *) {
+            base.layer.cornerCurve = .continuous
+        }
+        
         switch rounding {
         case let .fixed(value):
             base.layer.cornerRadius = value

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -30,19 +30,19 @@ public final class StoredPaymentMethodComponent: PaymentComponent, PresentableCo
         Analytics.sendEvent(component: storedPaymentMethod.type, flavor: _isDropIn ? .dropin : .components, environment: environment)
         
         let displayInformation = storedPaymentMethod.localizedDisplayInformation(using: localizationParameters)
-        let alertController = UIAlertController(title: ADYLocalizedString("adyen.dropIn.stored.title",
-                                                                          localizationParameters, storedPaymentMethod.name),
+        let alertController = UIAlertController(title: localizedString(.dropInStoredTitle,
+                                                                       localizationParameters, storedPaymentMethod.name),
                                                 message: displayInformation.title,
                                                 preferredStyle: .alert)
         
-        let cancelAction = UIAlertAction(title: ADYLocalizedString("adyen.cancelButton", localizationParameters), style: .cancel) { _ in
+        let cancelAction = UIAlertAction(title: localizedString(.cancelButton, localizationParameters), style: .cancel) { _ in
             self.delegate?.didFail(with: ComponentError.cancelled, from: self)
         }
         alertController.addAction(cancelAction)
         
-        let submitActionTitle = ADYLocalizedSubmitButtonTitle(with: payment?.amount,
-                                                              style: .immediate,
-                                                              localizationParameters)
+        let submitActionTitle = localizedSubmitButtonTitle(with: payment?.amount,
+                                                           style: .immediate,
+                                                           localizationParameters)
         let submitAction = UIAlertAction(title: submitActionTitle, style: .default) { _ in
             let details = StoredPaymentDetails(paymentMethod: self.storedPaymentMethod)
             self.submit(data: PaymentComponentData(paymentMethodDetails: details))

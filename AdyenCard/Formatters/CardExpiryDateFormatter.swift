@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -15,7 +15,7 @@ public final class CardExpiryDateFormatter: NumericFormatter {
     override public func formattedValue(for value: String) -> String {
         let separator = " / "
         
-        let sanitizedString = sanitizedValue(for: value).truncate(to: maxLength)
+        let sanitizedString = sanitizedValue(for: value).adyen.truncate(to: maxLength)
         
         var formattedDate = sanitizedString
         var month = 0
@@ -38,11 +38,11 @@ public final class CardExpiryDateFormatter: NumericFormatter {
                 formattedDate += separator
             }
         case 3:
-            month = Int(sanitizedString[0...1])!
-            formattedDate = sanitizedString[0...1] + separator + sanitizedString[2]
+            month = Int(sanitizedString.adyen[0...1])!
+            formattedDate = sanitizedString.adyen[0...1] + separator + sanitizedString.adyen[2]
         case 4:
-            month = Int(sanitizedString[0...1])!
-            formattedDate = sanitizedString[0...1] + separator + sanitizedString[2...3]
+            month = Int(sanitizedString.adyen[0...1])!
+            formattedDate = sanitizedString.adyen[0...1] + separator + sanitizedString.adyen[2...3]
         default:
             break
         }

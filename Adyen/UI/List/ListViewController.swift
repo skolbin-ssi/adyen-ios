@@ -22,11 +22,7 @@ public final class ListViewController: UITableViewController {
     /// - Parameter style: The UI style.
     public init(style: ListComponentStyle = ListComponentStyle()) {
         self.style = style
-        if #available(iOS 11.0, *) {
-            super.init(style: .grouped)
-        } else {
-            super.init(style: .plain)
-        }
+        super.init(style: .grouped)
     }
     
     /// :nodoc:
@@ -40,7 +36,7 @@ public final class ListViewController: UITableViewController {
         get { tableView.contentSize }
         
         // swiftlint:disable:next unused_setter_value
-        set { assertionFailure("""
+        set { AdyenAssertion.assert(message: """
         PreferredContentSize is overridden for this view controller.
         getter - returns content size of scroll view.
         setter - no implemented.

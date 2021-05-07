@@ -31,6 +31,9 @@ public enum Action: Decodable {
     /// Indicates that a voucher is presented to the shopper.
     case voucher(VoucherAction)
     
+    /// Indicates that a QR code is presented to the shopper.
+    case qrCode(QRCodeAction)
+    
     // MARK: - Coding
     
     /// :nodoc:
@@ -39,7 +42,7 @@ public enum Action: Decodable {
         let type = try container.decode(ActionType.self, forKey: .type)
         
         switch type {
-        case .redirect, .qrCode:
+        case .redirect:
             self = .redirect(try RedirectAction(from: decoder))
         case .threeDS2Fingerprint:
             self = .threeDS2Fingerprint(try ThreeDS2FingerprintAction(from: decoder))
@@ -53,6 +56,18 @@ public enum Action: Decodable {
             self = .await(try AwaitAction(from: decoder))
         case .voucher:
             self = .voucher(try VoucherAction(from: decoder))
+        case .qrCode:
+            self = try Self.handleQRCodeType(from: decoder)
+        }
+    }
+    
+    /// :nodoc:
+    private static func handleQRCodeType(from decoder: Decoder) throws -> Action {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        if (try? container.decode(QRCodePaymentMethod.self, forKey: .paymentMethodType)) != nil {
+            return .qrCode(try QRCodeAction(from: decoder))
+        } else {
+            return .redirect(try RedirectAction(from: decoder))
         }
     }
     
@@ -69,6 +84,7 @@ public enum Action: Decodable {
 
     private enum CodingKeys: String, CodingKey {
         case type
+        case paymentMethodType
     }
     
 }

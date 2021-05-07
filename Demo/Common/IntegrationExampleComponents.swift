@@ -17,8 +17,9 @@ extension IntegrationExample {
     internal func presentCardComponent() {
         guard let paymentMethod = paymentMethods?.paymentMethod(ofType: CardPaymentMethod.self) else { return }
         let style = FormComponentStyle()
+        let config = CardComponent.Configuration(billingAddressMode: .postalCode)
         let component = CardComponent(paymentMethod: paymentMethod,
-                                      configuration: CardComponent.Configuration(),
+                                      configuration: config,
                                       clientKey: clientKey,
                                       style: style)
         component.cardComponentDelegate = self
@@ -63,6 +64,13 @@ extension IntegrationExample {
         present(presentableComponent)
     }
 
+    internal func presentConvenienceStore() {
+        guard let paymentMethod = paymentMethods?.paymentMethod(ofType: EContextStoresPaymentMethod.self) else { return }
+        let component = EContextStoreComponent(paymentMethod: paymentMethod)
+        component.delegate = self
+        present(component)
+    }
+
     // MARK: - Presentation
 
     private func present(_ component: PresentableComponent) {
@@ -96,9 +104,7 @@ extension IntegrationExample {
 
     @objc private func cancelDidPress() {
         currentComponent?.cancelIfNeeded()
-        if let paymentComponent = self.currentComponent as? PaymentComponent {
-            paymentComponent.delegate?.didFail(with: ComponentError.cancelled, from: paymentComponent)
-        }
+        presenter?.dismiss(completion: nil)
     }
 
     // MARK: - Payment response handling
@@ -117,7 +123,7 @@ extension IntegrationExample {
     }
 
     private func handle(_ action: Action) {
-        actionComponent.perform(action)
+        actionComponent.handle(action)
     }
 
 }

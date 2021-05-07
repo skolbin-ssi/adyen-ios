@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -17,7 +17,7 @@ public final class CardNumberFormatter: NumericFormatter {
     /// :nodoc:
     override public func formattedValue(for value: String) -> String {
         let sanitizedCardNumber = sanitizedValue(for: value)
-        let formattedCardNumberComponents = sanitizedCardNumber.components(withLengths: cardFormatGrouping)
+        let formattedCardNumberComponents = sanitizedCardNumber.adyen.components(withLengths: cardFormatGrouping)
         return formattedCardNumberComponents.joined(separator: " ")
     }
     

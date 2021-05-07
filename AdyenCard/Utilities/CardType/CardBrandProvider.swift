@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -10,7 +10,7 @@ import Foundation
 /// :nodoc:
 internal protocol AnyCardBrandProvider: Component {
     /// :nodoc:
-    func provide(for parameters: CardBrandProviderParameters, completion: @escaping ([CardBrand]) -> Void)
+    func provide(for parameters: CardBrandProviderParameters, completion: @escaping (BinLookupResponse) -> Void)
 }
 
 /// Describes input parameters to an instance of `AnyCardBrandProvider`.
@@ -26,7 +26,7 @@ internal struct CardBrandProviderParameters {
 /// Provide cardType detection based on BinLookup API.
 internal final class CardBrandProvider: AnyCardBrandProvider {
     
-    private static let minBinLength = 6
+    private static let minBinLength = 11
     
     private let apiClient: APIClientProtocol?
 
@@ -56,25 +56,27 @@ internal final class CardBrandProvider: AnyCardBrandProvider {
     ///   - bin: Card's BIN number. If longer than `minBinLength` - calls API, otherwise check local Regex.
     ///   - brands: Card brands supported by the merchant.
     ///   - completion:  Callback to notify about results.
-    internal func provide(for parameters: CardBrandProviderParameters, completion: @escaping ([CardBrand]) -> Void) {
-        guard parameters.bin.count > CardBrandProvider.minBinLength else {
+    internal func provide(for parameters: CardBrandProviderParameters, completion: @escaping (BinLookupResponse) -> Void) {
+        guard parameters.bin.count >= CardBrandProvider.minBinLength else {
             return fallbackCardTypeProvider.provide(for: parameters,
                                                     completion: completion)
         }
         
-        fetchBinLookupService(success: { [weak self] service in
-            self?.use(binLookupService: service,
-                      parameters: parameters,
-                      completion: completion)
-        }, failure: { [weak self] _ in
-            self?.fallbackCardTypeProvider.provide(for: parameters,
-                                                   completion: completion)
-        })
+        fetchBinLookupService(
+            success: { [weak self] service in
+                self?.use(binLookupService: service,
+                          parameters: parameters,
+                          completion: completion)
+            },
+            failure: { [weak self] _ in
+                self?.fallbackCardTypeProvider.provide(for: parameters, completion: completion)
+            }
+        )
     }
 
     private func use(binLookupService: BinLookupService,
                      parameters: CardBrandProviderParameters,
-                     completion: @escaping ([CardBrand]) -> Void) {
+                     completion: @escaping (BinLookupResponse) -> Void) {
         binLookupService.requestCardType(for: parameters.bin,
                                          supportedCardTypes: parameters.supportedTypes) { [weak self] result in
             self?.handle(result: result,
@@ -85,10 +87,10 @@ internal final class CardBrandProvider: AnyCardBrandProvider {
 
     private func handle(result: Result<BinLookupResponse, Error>,
                         parameters: CardBrandProviderParameters,
-                        completion: @escaping ([CardBrand]) -> Void) {
+                        completion: @escaping (BinLookupResponse) -> Void) {
         switch result {
         case let .success(response):
-            completion(response.brands ?? [])
+            completion(response)
         case .failure:
             fallbackCardTypeProvider.provide(for: parameters,
                                              completion: completion)

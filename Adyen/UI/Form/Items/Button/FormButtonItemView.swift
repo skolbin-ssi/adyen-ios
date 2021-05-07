@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -8,7 +8,7 @@ import Foundation
 import UIKit
 
 /// A view representing a footer item.
-internal final class FormButtonItemView: FormItemView<FormButtonItem>, Observer {
+internal final class FormButtonItemView: FormItemView<FormButtonItem> {
     
     /// Initializes the footer item view.
     ///
@@ -22,7 +22,7 @@ internal final class FormButtonItemView: FormItemView<FormButtonItem>, Observer 
         bind(item.$showsActivityIndicator, to: submitButton, at: \.showsActivityIndicator)
         bind(item.$enabled, to: submitButton, at: \.isEnabled)
         
-        submitButton.adyen.anchore(inside: self)
+        submitButton.adyen.anchor(inside: self)
     }
     
     // MARK: - Submit Button

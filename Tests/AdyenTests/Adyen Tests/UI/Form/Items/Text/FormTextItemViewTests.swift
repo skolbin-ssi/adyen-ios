@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -45,9 +45,8 @@ class FormTextItemViewTests: XCTestCase {
         }
         
         let didChangeValueExpectation = XCTestExpectation(description: "Expect delegate.didChangeValue() to be called.")
-        delegate.handleDidChangeValue = { itemView in
+        _ = sut.item.publisher.addEventHandler { event in
             didChangeValueExpectation.fulfill()
-            XCTAssertTrue(itemView === self.sut)
         }
         
         validator.handleMaximumLength = { _ in 6 }

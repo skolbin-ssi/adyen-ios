@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -30,8 +30,14 @@ public struct FormItemViewBuilder {
     
     /// Builds `FormPhoneExtensionPickerItemView` from `FormPhoneExtensionPickerItem`.
     /// :nodoc:
-    internal func build(with item: FormPhoneExtensionPickerItem) -> FormItemView<FormPhoneExtensionPickerItem> {
+    public func build(with item: FormPhoneExtensionPickerItem) -> BaseFormPickerItemView<PhoneExtensionViewModel> {
         FormPhoneExtensionPickerItemView(item: item)
+    }
+
+    /// Builds `FormRegionPickerItemView` from `FormRegionPickerItem`.
+    /// :nodoc:
+    public func build(with item: FormRegionPickerItem) -> BaseFormPickerItemView<Region> {
+        FormRegionPickerItemView(item: item)
     }
     
     /// Builds `FormTextInputItemView` from `FormTextInputItem`.
@@ -58,5 +64,23 @@ public struct FormItemViewBuilder {
     /// :nodoc:
     public func build(with item: FormSeparatorItem) -> FormItemView<FormSeparatorItem> {
         FormSeparatorItemView(item: item)
+    }
+
+    /// Builds `FormErrorItemView` from `FormErrorItem`.
+    /// :nodoc:
+    public func build(with item: FormErrorItem) -> FormItemView<FormErrorItem> {
+        FormErrorItemView(item: item)
+    }
+    
+    /// Builds `FormVerticalStackItemView` from `FormAddressItem`.
+    /// :nodoc:
+    public func build(with item: FullFormAddressItem) -> FormItemView<FullFormAddressItem> {
+        FormVerticalStackItemView(item: item)
+    }
+
+    public static func build(_ item: FormItem) -> AnyFormItemView {
+        let itemView = item.build(with: FormItemViewBuilder())
+        itemView.accessibilityIdentifier = item.identifier
+        return itemView
     }
 }

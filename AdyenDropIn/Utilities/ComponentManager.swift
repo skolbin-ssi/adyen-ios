@@ -21,15 +21,10 @@ internal final class ComponentManager {
     /// Indicates the UI configuration of the drop in component.
     private var style: DropInComponent.Style
     
-    /// Defines the environment used to make networking requests.
-    internal var environment: Environment = .live
-    
     internal init(paymentMethods: PaymentMethods,
-                  payment: Payment?,
                   configuration: DropInComponent.PaymentMethodsConfiguration,
                   style: DropInComponent.Style) {
         self.paymentMethods = paymentMethods
-        self.payment = payment
         self.configuration = configuration
         self.style = style
     }
@@ -51,18 +46,18 @@ internal final class ComponentManager {
     private func component(for paymentMethod: PaymentMethod) -> PaymentComponent? {
         guard isAllowed(paymentMethod) else {
             // swiftlint:disable:next line_length
-            assertionFailure("For voucher payment methods like \(paymentMethod.name) it is required to add a suitable text for the key NSPhotoLibraryAddUsageDescription in the Application Info.plist, to enable the shopper to save the voucher to their photo library.")
+            AdyenAssertion.assert(message: "For voucher payment methods like \(paymentMethod.name) it is required to add a suitable text for the key NSPhotoLibraryAddUsageDescription in the Application Info.plist, to enable the shopper to save the voucher to their photo library.")
             return nil
         }
-        let paymentComponent: PaymentComponent? = paymentMethod.buildComponent(using: self)
-        
-        paymentComponent?.clientKey = configuration.clientKey
-        paymentComponent?.environment = environment
-        
+
+        guard let paymentComponent = paymentMethod.buildComponent(using: self) else { return nil }
+
         if var paymentComponent = paymentComponent as? Localizable {
             paymentComponent.localizationParameters = configuration.localizationParameters
         }
-        
+
+        paymentComponent.payment = configuration.payment
+        paymentComponent.clientKey = configuration.clientKey
         return paymentComponent
     }
 
@@ -78,7 +73,6 @@ internal final class ComponentManager {
     // MARK: - Private
     
     private let paymentMethods: PaymentMethods
-    private let payment: Payment?
     private let configuration: DropInComponent.PaymentMethodsConfiguration
     
     private func createCardComponent(with paymentMethod: AnyCardPaymentMethod) -> PaymentComponent? {
@@ -87,6 +81,7 @@ internal final class ComponentManager {
         let configuration = CardComponent.Configuration(showsHolderNameField: cardConfiguration.showsHolderNameField,
                                                         showsStorePaymentMethodField: cardConfiguration.showsStorePaymentMethodField,
                                                         showsSecurityCodeField: cardConfiguration.showsSecurityCodeField,
+                                                        billingAddressMode: cardConfiguration.billingAddress,
                                                         storedCardConfiguration: cardConfiguration.stored)
 
         return CardComponent(paymentMethod: paymentMethod,
@@ -109,25 +104,28 @@ internal final class ComponentManager {
                              style: style.formComponent)
     }
     
-    private func createApplePayComponent(with paymentMethod: ApplePayPaymentMethod) -> PaymentComponent? {
-        guard
-            let summaryItems = configuration.applePay.summaryItems,
-            let identfier = configuration.applePay.merchantIdentifier,
-            let payment = payment else {
+    private func createPreApplePayComponent(with paymentMethod: ApplePayPaymentMethod) -> PaymentComponent? {
+        guard let applePay = configuration.applePay else {
+            adyenPrint("Failed to instantiate ApplePayComponent because ApplePayConfiguration is missing")
             return nil
         }
         
-        let requiredBillingContactFields = configuration.applePay.requiredBillingContactFields
-        let requiredShippingContactFields = configuration.applePay.requiredShippingContactFields
+        guard let payment = configuration.payment else {
+            adyenPrint("Failed to instantiate ApplePayComponent because payment is missing")
+            return nil
+        }
+        
+        let configuration = ApplePayComponent.Configuration(
+            payment: payment,
+            paymentMethod: paymentMethod,
+            summaryItems: applePay.summaryItems,
+            merchantIdentifier: applePay.merchantIdentifier,
+            requiredBillingContactFields: applePay.requiredBillingContactFields,
+            requiredShippingContactFields: applePay.requiredShippingContactFields
+        )
         
         do {
-            let configuration = ApplePayComponent.Configuration(payment: payment,
-                                                                paymentMethod: paymentMethod,
-                                                                summaryItems: summaryItems,
-                                                                merchantIdentifier: identfier,
-                                                                requiredBillingContactFields: requiredBillingContactFields,
-                                                                requiredShippingContactFields: requiredShippingContactFields)
-            return try ApplePayComponent(configuration: configuration)
+            return try PreApplePayComponent(configuration: configuration)
         } catch {
             adyenPrint("Failed to instantiate ApplePayComponent because of error: \(error.localizedDescription)")
             return nil
@@ -195,7 +193,7 @@ extension ComponentManager: PaymentComponentBuilder {
     
     /// :nodoc:
     internal func build(paymentMethod: ApplePayPaymentMethod) -> PaymentComponent? {
-        createApplePayComponent(with: paymentMethod)
+        createPreApplePayComponent(with: paymentMethod)
     }
     
     /// :nodoc:
@@ -218,6 +216,30 @@ extension ComponentManager: PaymentComponentBuilder {
     /// :nodoc:
     internal func build(paymentMethod: BLIKPaymentMethod) -> PaymentComponent? {
         createBLIKComponent(paymentMethod)
+    }
+
+    /// :nodoc:
+    internal func build(paymentMethod: SevenElevenPaymentMethod) -> PaymentComponent? {
+        SevenElevenComponent(paymentMethod: paymentMethod,
+                             style: style.formComponent)
+    }
+
+    /// :nodoc:
+    internal func build(paymentMethod: EContextStoresPaymentMethod) -> PaymentComponent? {
+        EContextStoreComponent(paymentMethod: paymentMethod,
+                               style: style.formComponent)
+    }
+
+    /// :nodoc:
+    internal func build(paymentMethod: EContextATMPaymentMethod) -> PaymentComponent? {
+        EContextATMComponent(paymentMethod: paymentMethod,
+                             style: style.formComponent)
+    }
+
+    /// :nodoc:
+    internal func build(paymentMethod: EContextOnlinePaymentMethod) -> PaymentComponent? {
+        EContextOnlineComponent(paymentMethod: paymentMethod,
+                                style: style.formComponent)
     }
 
     /// :nodoc:

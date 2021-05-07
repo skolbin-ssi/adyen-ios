@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -11,12 +11,14 @@ import UIKit
 
 internal final class ModalViewController: UIViewController {
     
-    private let style: NavigationStyle
+    internal let style: NavigationStyle
+
     private let innerController: UIViewController
-    
-    /// :nodoc:
-    private var navigationBarHeight: CGFloat = 63.0
-    
+
+    internal weak var delegate: ViewControllerDelegate?
+
+    private let navigationBarHeight: CGFloat = 63.0
+
     // MARK: - Initializing
     
     /// Initializes the component view controller.
@@ -33,8 +35,6 @@ internal final class ModalViewController: UIViewController {
         self.style = style
         
         super.init(nibName: nil, bundle: nil)
-        
-        addChild(rootViewController)
     }
     
     /// :nodoc:
@@ -52,22 +52,18 @@ internal final class ModalViewController: UIViewController {
     // MARK: - UIViewController
     
     /// :nodoc:
-    override public func loadView() {
-        super.loadView()
-        
+    override public func viewDidLoad() {
+        super.viewDidLoad()
+        addChildViewController()
+        view.backgroundColor = style.backgroundColor
+    }
+
+    private func addChildViewController() {
         innerController.willMove(toParent: self)
         addChild(innerController)
         view.addSubview(stackView)
         innerController.didMove(toParent: self)
         arrangeConstraints()
-    }
-    
-    /// :nodoc:
-    override public func viewDidLoad() {
-        super.viewDidLoad()
-        
-        innerController.view.layoutIfNeeded()
-        view.backgroundColor = style.backgroundColor
     }
     
     override internal var preferredContentSize: CGSize {
@@ -78,7 +74,7 @@ internal final class ModalViewController: UIViewController {
         }
         
         // swiftlint:disable:next unused_setter_value
-        set { assertionFailure("""
+        set { AdyenAssertion.assert(message: """
         PreferredContentSize is overridden for this view controller.
         getter - returns combined size of an inner content and navigation bar.
         setter - no implemented.
@@ -130,17 +126,11 @@ internal final class ModalViewController: UIViewController {
     private func arrangeConstraints() {
         let separatorHeight: CGFloat = 1.0 / UIScreen.main.scale
         let toolbarHeight = navigationBarHeight - separatorHeight
-        
-        let bottomConstraint = stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        bottomConstraint.priority = .defaultHigh
 
+        stackView.adyen.anchor(inside: view)
         NSLayoutConstraint.activate([
             toolbar.heightAnchor.constraint(equalToConstant: toolbarHeight),
-            separator.heightAnchor.constraint(equalToConstant: separatorHeight),
-            stackView.topAnchor.constraint(equalTo: view.topAnchor),
-            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomConstraint
+            separator.heightAnchor.constraint(equalToConstant: separatorHeight)
         ])
     }
 }

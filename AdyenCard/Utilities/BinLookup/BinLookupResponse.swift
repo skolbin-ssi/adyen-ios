@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -17,7 +17,7 @@ internal struct BinLookupResponse: Response {
     internal let requestId: String
 
     /// :nodoc:
-    internal let issuingCountryCode: String
+    internal let issuingCountryCode: String?
 
     /// :nodoc:
     internal init(brands: [CardBrand]?,

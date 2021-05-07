@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -29,7 +29,7 @@ internal final class DimmingPresentationController: UIPresentationController {
     
     private func attachDimmigView(to view: UIView) {
         view.insertSubview(dimmingView, at: 0)
-        dimmingView.adyen.anchore(inside: view)
+        dimmingView.adyen.anchor(inside: view)
     }
     
     override internal func containerViewWillLayoutSubviews() {

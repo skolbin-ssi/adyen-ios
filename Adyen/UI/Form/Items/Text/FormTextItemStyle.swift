@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -31,7 +31,11 @@ public struct FormTextItemStyle: FormValueItemStyle {
                                  contentMode: .scaleAspectFit)
     
     /// The tint color of text field and separator in focused state.
-    public var tintColor: UIColor?
+    public var tintColor: UIColor? {
+        didSet {
+            icon.tintColor = tintColor
+        }
+    }
     
     /// :nodoc:
     public var backgroundColor: UIColor = .clear

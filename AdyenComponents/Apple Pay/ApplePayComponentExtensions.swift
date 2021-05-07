@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -26,7 +26,7 @@ extension ApplePayComponent: PKPaymentAuthorizationViewControllerDelegate {
                                                    didAuthorizePayment payment: PKPayment,
                                                    completion: @escaping (PKPaymentAuthorizationStatus) -> Void) {
         paymentAuthorizationCompletion = completion
-        let token = String(data: payment.token.paymentData, encoding: .utf8) ?? ""
+        let token = payment.token.paymentData.base64EncodedString()
         let network = payment.token.paymentMethod.network?.rawValue ?? ""
         let billingContact = payment.billingContact
         let shippingContact = payment.shippingContact
@@ -105,19 +105,14 @@ extension ApplePayComponent {
 
         internal func createPaymentRequest() -> PKPaymentRequest {
             let paymentRequest = PKPaymentRequest()
-
             paymentRequest.countryCode = payment.countryCode ?? ""
             paymentRequest.merchantIdentifier = merchantIdentifier
             paymentRequest.currencyCode = payment.amount.currencyCode
             paymentRequest.supportedNetworks = supportedNetworks
             paymentRequest.merchantCapabilities = .capability3DS
             paymentRequest.paymentSummaryItems = summaryItems
-
-            if #available(iOS 11.0, *) {
-                paymentRequest.requiredBillingContactFields = requiredBillingContactFields
-                paymentRequest.requiredShippingContactFields = requiredShippingContactFields
-            }
-
+            paymentRequest.requiredBillingContactFields = requiredBillingContactFields
+            paymentRequest.requiredShippingContactFields = requiredShippingContactFields
             return paymentRequest
         }
     }

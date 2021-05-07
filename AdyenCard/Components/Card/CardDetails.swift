@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -11,7 +11,7 @@ import Adyen
 import Foundation
 
 /// Contains the details provided by the card component.
-public struct CardDetails: PaymentMethodDetails {
+public struct CardDetails: PaymentMethodDetails, BillingAddressInformation {
     
     /// The payment method type.
     public let type: String
@@ -36,6 +36,9 @@ public struct CardDetails: PaymentMethodDetails {
     
     /// The card funding source.
     public let fundingSource: CardFundingSource?
+
+    /// The billing address information.
+    public var billingAddress: AddressInfo?
     
     /// Initializes the card payment details.
     ///
@@ -45,7 +48,10 @@ public struct CardDetails: PaymentMethodDetails {
     ///   - paymentMethod: The used card payment method.
     ///   - encryptedCard: The encrypted card to read the details from.
     ///   - holderName: The holder name if available.
-    public init(paymentMethod: AnyCardPaymentMethod, encryptedCard: EncryptedCard, holderName: String? = nil) {
+    public init(paymentMethod: AnyCardPaymentMethod,
+                encryptedCard: EncryptedCard,
+                holderName: String? = nil,
+                billingAddress: AddressInfo? = nil) {
         self.type = paymentMethod.type
         self.encryptedCardNumber = encryptedCard.number
         self.encryptedExpiryMonth = encryptedCard.expiryMonth
@@ -54,6 +60,7 @@ public struct CardDetails: PaymentMethodDetails {
         self.holderName = holderName
         self.storedPaymentMethodIdentifier = nil
         self.fundingSource = paymentMethod.fundingSource
+        self.billingAddress = billingAddress
     }
     
     /// Initializes the card payment details for a stored card payment method.
@@ -85,6 +92,7 @@ public struct CardDetails: PaymentMethodDetails {
         case encryptedSecurityCode
         case holderName
         case fundingSource
+        case billingAddress
     }
     
 }

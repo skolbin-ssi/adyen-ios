@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -15,7 +15,7 @@ class FormCardNumberItemViewTests: XCTestCase {
     var validator: ValidatorMock!
     
     override func setUp() {
-        item = FormCardNumberItem(supportedCardTypes: [.masterCard, .visa, .americanExpress], environment: Environment.test)
+        item = FormCardNumberItem(supportedCardTypes: [.masterCard, .visa, .americanExpress], logoProvider: LogoURLProvider(environment: .test))
         validator = ValidatorMock()
         
         item.validator = validator

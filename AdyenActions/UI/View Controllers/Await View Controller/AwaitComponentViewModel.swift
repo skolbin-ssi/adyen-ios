@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -38,10 +38,10 @@ internal struct AwaitComponentViewModel {
                                    localizationParameters: LocalizationParameters? = nil) -> AwaitComponentViewModel {
         switch paymentMethodType {
         case .mbway, .blik:
-            let localizationString = "adyen.\(paymentMethodType.rawValue).confirmPayment"
+            let localizationKey = LocalizationKey(key: "adyen.\(paymentMethodType.rawValue).confirmPayment")
             return AwaitComponentViewModel(icon: paymentMethodType.rawValue,
-                                           message: ADYLocalizedString(localizationString, localizationParameters),
-                                           spinnerTitle: ADYLocalizedString("adyen.await.waitForConfirmation", localizationParameters))
+                                           message: localizedString(localizationKey, localizationParameters),
+                                           spinnerTitle: localizedString(.awaitWaitForConfirmation, localizationParameters))
         }
     }
     

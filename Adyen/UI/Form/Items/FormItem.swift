@@ -1,10 +1,16 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
 import Foundation
+
+/// :nodoc:
+public protocol Hidable {
+    /// :nodoc:
+    var isHidden: Observable<Bool> { get }
+}
 
 /// An item in a form.
 /// :nodoc:
@@ -13,18 +19,12 @@ public protocol FormItem: AnyObject {
     /// An identifier for the `FormItem`,
     /// that  is set to the `FormItemView.accessibilityIdentifier` when the corresponding `FormItemView` is created.
     var identifier: String? { get set }
-    
-    /// Builds the corresponding `AnyFormItemView`.
-    func build(with builder: FormItemViewBuilder) -> AnyFormItemView
-}
 
-/// An item that is composed of multiple sub items.
-/// :nodoc:
-public protocol CompoundFormItem: FormItem {
-    
     /// The list of sub-items.
     var subitems: [FormItem] { get }
     
+    /// Builds the corresponding `AnyFormItemView`.
+    func build(with builder: FormItemViewBuilder) -> AnyFormItemView
 }
 
 /// :nodoc:
@@ -32,8 +32,9 @@ public extension FormItem {
     
     /// The flat list of all sub-items.
     var flatSubitems: [FormItem] {
-        (self as? CompoundFormItem)?.subitems.flatMap(\.flatSubitems) ?? [self]
+        [self] + subitems.flatMap(\.flatSubitems)
     }
+    
 }
 
 /// A validatable form item.
@@ -53,3 +54,16 @@ public protocol ValidatableFormItem: FormItem {
 /// A form item that requires keyboard input or otherwise custom input view.
 /// :nodoc:
 public protocol InputViewRequiringFormItem: FormItem {}
+
+/// Delegate to the view all events that requireschange in corespondent FormView changes.
+/// :nodoc:
+internal protocol SelfRenderingFormItemDelegate: AnyObject {
+
+    /// Notify delegate that items have changed.
+    func didUpdateItems(_ items: [FormItem])
+
+}
+
+internal protocol CompoundFormItem {
+    var delegate: SelfRenderingFormItemDelegate? { get set }
+}

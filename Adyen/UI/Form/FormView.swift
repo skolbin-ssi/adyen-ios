@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -9,14 +9,14 @@ import UIKit
 /// Displays a form for the user to enter details.
 /// :nodoc:
 internal final class FormView: UIScrollView {
-    
+
     /// Initializes the form view.
     internal init() {
         super.init(frame: .zero)
         
         preservesSuperviewLayoutMargins = true
         addSubview(stackView)
-        
+
         configureConstraints()
     }
     
@@ -42,18 +42,7 @@ internal final class FormView: UIScrollView {
     internal func appendItemView(_ itemView: UIView) {
         stackView.addArrangedSubview(itemView)
     }
-    
-    override internal var contentOffset: CGPoint {
-        get {
-            super.contentOffset
-        }
-        
-        set {
-            let noNeedToScroll = contentSize.height <= frame.size.height
-            super.contentOffset = noNeedToScroll ? .zero : newValue
-        }
-    }
-    
+
     // MARK: - Stack View
     
     private lazy var stackView: UIStackView = {
@@ -68,7 +57,7 @@ internal final class FormView: UIScrollView {
     // MARK: - Layout
 
     private func configureConstraints() {
-        stackView.adyen.anchore(inside: self)
+        stackView.adyen.anchor(inside: self)
         stackView.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
     }
     

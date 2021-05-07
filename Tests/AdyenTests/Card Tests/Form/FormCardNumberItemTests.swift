@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -29,7 +29,7 @@ class FormCardNumberItemTests: XCTestCase {
     }
 
     func testInternalBinLookup() {
-        let item = FormCardNumberItem(supportedCardTypes: supportedCardTypes, environment: .test)
+        let item = FormCardNumberItem(supportedCardTypes: supportedCardTypes, logoProvider: LogoURLProvider(environment: .test))
         XCTAssertEqual(item.cardTypeLogos.count, 5)
         
         let visa = item.cardTypeLogos[0]
@@ -49,7 +49,7 @@ class FormCardNumberItemTests: XCTestCase {
         item.value = "5"
         let parameters1 = CardBrandProviderParameters(bin: item.value, supportedTypes: supportedCardTypes)
         cardBrandProvider.provide(for: parameters1) { response in
-            let brands = response.map(\.type)
+            let brands = response.brands!.map(\.type)
             item.showLogos(for: brands)
             XCTAssertEqual(visa.isHidden, true)
             XCTAssertEqual(mc.isHidden, true)
@@ -62,7 +62,7 @@ class FormCardNumberItemTests: XCTestCase {
         item.value = "56"
         let parameters2 = CardBrandProviderParameters(bin: item.value, supportedTypes: supportedCardTypes)
         cardBrandProvider.provide(for: parameters2) { response in
-            let brands = response.map(\.type)
+            let brands = response.brands!.map(\.type)
             item.showLogos(for: brands)
             XCTAssertEqual(visa.isHidden, true)
             XCTAssertEqual(mc.isHidden, true)
@@ -75,7 +75,7 @@ class FormCardNumberItemTests: XCTestCase {
         item.value = "55"
         let parameters3 = CardBrandProviderParameters(bin: item.value, supportedTypes: supportedCardTypes)
         cardBrandProvider.provide(for: parameters3) { response in
-            let brands = response.map(\.type)
+            let brands = response.brands!.map(\.type)
             item.showLogos(for: brands)
             XCTAssertEqual(visa.isHidden, true)
             XCTAssertEqual(mc.isHidden, false)
@@ -88,7 +88,7 @@ class FormCardNumberItemTests: XCTestCase {
         item.value = "5555"
         let parameters4 = CardBrandProviderParameters(bin: item.value, supportedTypes: supportedCardTypes)
         cardBrandProvider.provide(for: parameters4) { response in
-            let brands = response.map(\.type)
+            let brands = response.brands!.map(\.type)
             item.showLogos(for: brands)
             XCTAssertEqual(visa.isHidden, true)
             XCTAssertEqual(mc.isHidden, false)
@@ -101,7 +101,7 @@ class FormCardNumberItemTests: XCTestCase {
         item.value = ""
         let parameters5 = CardBrandProviderParameters(bin: item.value, supportedTypes: supportedCardTypes)
         cardBrandProvider.provide(for: parameters5) { response in
-            let brands = response.map(\.type)
+            let brands = response.brands!.map(\.type)
             item.showLogos(for: brands)
             XCTAssertEqual(visa.isHidden, true)
             XCTAssertEqual(mc.isHidden, true)
@@ -114,7 +114,7 @@ class FormCardNumberItemTests: XCTestCase {
         item.value = "4"
         let parameters6 = CardBrandProviderParameters(bin: item.value, supportedTypes: supportedCardTypes)
         cardBrandProvider.provide(for: parameters6) { response in
-            let brands = response.map(\.type)
+            let brands = response.brands!.map(\.type)
             item.showLogos(for: brands)
             XCTAssertEqual(visa.isHidden, false)
             XCTAssertEqual(mc.isHidden, true)
@@ -127,7 +127,7 @@ class FormCardNumberItemTests: XCTestCase {
         item.value = "34"
         let parameters7 = CardBrandProviderParameters(bin: item.value, supportedTypes: supportedCardTypes)
         cardBrandProvider.provide(for: parameters7) { response in
-            let brands = response.map(\.type)
+            let brands = response.brands!.map(\.type)
             item.showLogos(for: brands)
             XCTAssertEqual(visa.isHidden, true)
             XCTAssertEqual(mc.isHidden, true)
@@ -140,7 +140,7 @@ class FormCardNumberItemTests: XCTestCase {
         item.value = "62"
         let parameters8 = CardBrandProviderParameters(bin: item.value, supportedTypes: supportedCardTypes)
         cardBrandProvider.provide(for: parameters8) { response in
-            let brands = response.map(\.type)
+            let brands = response.brands!.map(\.type)
             item.showLogos(for: brands)
             XCTAssertEqual(visa.isHidden, true)
             XCTAssertEqual(mc.isHidden, true)
@@ -156,7 +156,7 @@ class FormCardNumberItemTests: XCTestCase {
         apiClient.mockedResults = [.success(BinLookupResponse(brands: mockedBrands)),
                                    .success(BinLookupResponse(brands: []))]
 
-        let item = FormCardNumberItem(supportedCardTypes: supportedCardTypes, environment: .test)
+        let item = FormCardNumberItem(supportedCardTypes: supportedCardTypes, logoProvider: LogoURLProvider(environment: .test))
         XCTAssertEqual(item.cardTypeLogos.count, 5)
 
         let visa = item.cardTypeLogos[0]
@@ -168,7 +168,7 @@ class FormCardNumberItemTests: XCTestCase {
         item.value = "1234567890"
         let parameters = CardBrandProviderParameters(bin: item.value, supportedTypes: supportedCardTypes)
         cardBrandProvider.provide(for: parameters) { response in
-            let brands = response.map(\.type)
+            let brands = response.brands!.map(\.type)
             item.showLogos(for: brands)
             XCTAssertEqual(visa.isHidden, true)
             XCTAssertEqual(mc.isHidden, true)
@@ -182,7 +182,7 @@ class FormCardNumberItemTests: XCTestCase {
         publicKeyProvider.onFetch = { $0(.success("SOME_PUBLIC_KEY")) }
         apiClient.mockedResults = [.failure(Dummy.dummyError), .failure(Dummy.dummyError)]
 
-        let item = FormCardNumberItem(supportedCardTypes: supportedCardTypes, environment: .test)
+        let item = FormCardNumberItem(supportedCardTypes: supportedCardTypes, logoProvider: LogoURLProvider(environment: .test))
         XCTAssertEqual(item.cardTypeLogos.count, 5)
 
         let visa = item.cardTypeLogos[0]
@@ -195,7 +195,7 @@ class FormCardNumberItemTests: XCTestCase {
         item.value = "5577000055770004"
         let parameters1 = CardBrandProviderParameters(bin: item.value, supportedTypes: supportedCardTypes)
         cardBrandProvider.provide(for: parameters1) { response in
-            let brands = response.map(\.type)
+            let brands = response.brands!.map(\.type)
             item.showLogos(for: brands)
             XCTAssertEqual(visa.isHidden, true)
             XCTAssertEqual(mc.isHidden, false)
@@ -208,7 +208,7 @@ class FormCardNumberItemTests: XCTestCase {
         item.value = "55770000557700040"
         let parameters2 = CardBrandProviderParameters(bin: item.value, supportedTypes: supportedCardTypes)
         cardBrandProvider.provide(for: parameters2) { response in
-            let brands = response.map(\.type)
+            let brands = response.brands!.map(\.type)
             item.showLogos(for: brands)
             XCTAssertEqual(visa.isHidden, true)
             XCTAssertEqual(mc.isHidden, true)
@@ -220,20 +220,20 @@ class FormCardNumberItemTests: XCTestCase {
     
     func testLocalizationWithCustomTableName() {
         let expectedLocalizationParameters = LocalizationParameters(tableName: "AdyenUIHost", keySeparator: nil)
-        let sut = FormCardNumberItem(supportedCardTypes: [.visa, .masterCard], environment: .test, localizationParameters: expectedLocalizationParameters)
+        let sut = FormCardNumberItem(supportedCardTypes: [.visa, .masterCard], logoProvider: LogoURLProvider(environment: .test), localizationParameters: expectedLocalizationParameters)
         
-        XCTAssertEqual(sut.title, ADYLocalizedString("adyen.card.numberItem.title", expectedLocalizationParameters))
-        XCTAssertEqual(sut.placeholder, ADYLocalizedString("adyen.card.numberItem.placeholder", expectedLocalizationParameters))
-        XCTAssertEqual(sut.validationFailureMessage, ADYLocalizedString("adyen.card.numberItem.invalid", expectedLocalizationParameters))
+        XCTAssertEqual(sut.title, localizedString(.cardNumberItemTitle, expectedLocalizationParameters))
+        XCTAssertEqual(sut.placeholder, localizedString(.cardNumberItemPlaceholder, expectedLocalizationParameters))
+        XCTAssertEqual(sut.validationFailureMessage, localizedString(.cardNumberItemInvalid, expectedLocalizationParameters))
     }
     
     func testLocalizationWithCustomKeySeparator() {
         let expectedLocalizationParameters = LocalizationParameters(tableName: "AdyenUIHostCustomSeparator", keySeparator: "_")
-        let sut = FormCardNumberItem(supportedCardTypes: [.visa, .masterCard], environment: .test, localizationParameters: expectedLocalizationParameters)
+        let sut = FormCardNumberItem(supportedCardTypes: [.visa, .masterCard], logoProvider: LogoURLProvider(environment: .test), localizationParameters: expectedLocalizationParameters)
         
-        XCTAssertEqual(sut.title, ADYLocalizedString("adyen_card_numberItem_title", expectedLocalizationParameters))
-        XCTAssertEqual(sut.placeholder, ADYLocalizedString("adyen_card_numberItem_placeholder", expectedLocalizationParameters))
-        XCTAssertEqual(sut.validationFailureMessage, ADYLocalizedString("adyen_card_numberItem_invalid", expectedLocalizationParameters))
+        XCTAssertEqual(sut.title, localizedString(LocalizationKey(key: "adyen_card_numberItem_title"), expectedLocalizationParameters))
+        XCTAssertEqual(sut.placeholder, localizedString(LocalizationKey(key: "adyen_card_numberItem_placeholder"), expectedLocalizationParameters))
+        XCTAssertEqual(sut.validationFailureMessage, localizedString(LocalizationKey(key: "adyen_card_numberItem_invalid"), expectedLocalizationParameters))
     }
     
 }

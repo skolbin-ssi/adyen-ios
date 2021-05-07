@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -30,8 +30,8 @@ public final class CardExpiryDateValidator: Validator {
     public func isValid(_ string: String) -> Bool {
         guard string.count == maximumLength(for: string) else { return false }
         
-        guard let month = Int(string[0...1]) else { return false }
-        guard let year = Int("20" + string[2...3]) else { return false }
+        guard let month = Int(string.adyen[0...1]) else { return false }
+        guard let year = Int("20" + string.adyen[2...3]) else { return false }
         
         guard (month >= 1 && month <= 12) || string.count < 2 else { return false }
         guard let expiryDate = calculateExpiryDate(fromYear: year, month: month) else { return false }

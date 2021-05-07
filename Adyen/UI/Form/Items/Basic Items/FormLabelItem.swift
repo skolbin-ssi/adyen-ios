@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -10,6 +10,9 @@ import UIKit
 /// Simple form item that represent a single UILable element.
 /// :nodoc:
 public class FormLabelItem: FormItem {
+
+    /// :nodoc:
+    public var subitems: [FormItem] = []
 
     /// :nodoc:
     public init(text: String, style: TextStyle, identifier: String? = nil) {
@@ -37,30 +40,13 @@ public class FormLabelItem: FormItem {
         label.textColor = style.color
         label.textAlignment = style.textAlignment
         label.backgroundColor = style.backgroundColor
+        label.adyen.round(using: style.cornerRounding)
         return label
     }
 }
 
-private class ADYLabel: UILabel {}
-
-/// :nodoc:
-extension ADYLabel: AnyFormItemView {
+private class ADYLabel: UILabel, AnyFormItemView {
 
     public var childItemViews: [AnyFormItemView] { [] }
-
-    public var delegate: FormItemViewDelegate? {
-        get {
-            objc_getAssociatedObject(self, &UIViewAssociatedKeys.delegate) as? FormItemViewDelegate
-        }
-        set {
-            objc_setAssociatedObject(self,
-                                     &UIViewAssociatedKeys.delegate,
-                                     newValue,
-                                     objc_AssociationPolicy.OBJC_ASSOCIATION_ASSIGN)
-        }
-    }
-}
-
-private enum UIViewAssociatedKeys {
-    internal static var delegate = "delegate"
+    
 }

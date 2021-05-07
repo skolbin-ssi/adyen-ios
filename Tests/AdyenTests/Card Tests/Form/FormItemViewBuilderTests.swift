@@ -10,7 +10,8 @@ import XCTest
 class FormItemViewBuilderTests: XCTestCase {
     
     func testFormPhoneExtensionPickerItemView() {
-        let selectableValues = [PhoneExtensionPickerItem(identifier: "test_id", title: "test title", phoneExtension: "test extension")]
+        let selectableValues = [PhoneExtensionPickerItem(identifier: "test_id",
+                                                         element: .init(title: "test title", phoneExtension: "test extension"))]
         let item = FormPhoneExtensionPickerItem(selectableValues: selectableValues, style: FormTextItemStyle())
         let view = item.build(with: FormItemViewBuilder())
         
@@ -32,19 +33,35 @@ class FormItemViewBuilderTests: XCTestCase {
     }
     
     func testFormSplitItemView() {
-        let textItems = [FormTextInputItem(), FormTextInputItem()]
-        let item = FormSplitItem(items: textItems, style: FormTextItemStyle())
+        let item = FormSplitItem(items: FormTextInputItem(), FormTextInputItem(), style: FormTextItemStyle())
         let view = item.build(with: FormItemViewBuilder())
         
         XCTAssertNotNil(view as? FormSplitItemView)
+        XCTAssertEqual(view.childItemViews.count, 2)
     }
     
     func testFormPhoneNumberItemView() {
-        let selectableValues = [PhoneExtensionPickerItem(identifier: "test_id", title: "test title", phoneExtension: "test extension")]
+        let selectableValues = [PhoneExtensionPickerItem(identifier: "test_id", element: .init(title: "test title", phoneExtension: "test extension"))]
         let item = FormPhoneNumberItem(selectableValues: selectableValues, style: FormTextItemStyle())
         let view = item.build(with: FormItemViewBuilder())
         
         XCTAssertNotNil(view as? FormPhoneNumberItemView)
+    }
+
+    func testFormSAddressItemViewUS() {
+        let item = FullFormAddressItem(initialCountry: "US", style: AddressStyle())
+        let view = item.build(with: FormItemViewBuilder())
+
+        XCTAssertNotNil(view as? FormVerticalStackItemView<FullFormAddressItem>)
+        XCTAssertEqual(view.childItemViews.count, 6)
+    }
+
+    func testFormSAddressItemViewNL() {
+        let item = FullFormAddressItem(initialCountry: "NL", style: AddressStyle())
+        let view = item.build(with: FormItemViewBuilder())
+
+        XCTAssertNotNil(view as? FormVerticalStackItemView<FullFormAddressItem>)
+        XCTAssertEqual(view.childItemViews.count, 8)
     }
     
 }

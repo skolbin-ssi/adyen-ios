@@ -1,10 +1,11 @@
 //
-// Copyright (c) 2020 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
 
 import Adyen
+import AdyenSwiftUI
 import SwiftUI
 
 internal struct ComponentsView: View {
@@ -17,7 +18,7 @@ internal struct ComponentsView: View {
                 Section(content: {
                     ForEach(section, id: \.self) { item in
                         Button(action: {
-                            item.selectionHandler?()
+                            item.selectionHandler()
                         }, label: {
                             Text(item.title)
                                 .frame(maxWidth: .infinity)

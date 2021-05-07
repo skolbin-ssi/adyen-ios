@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Adyen N.V.
+// Copyright (c) 2021 Adyen N.V.
 //
 // This file is open source and available under the MIT license. See the LICENSE file for more info.
 //
@@ -21,8 +21,8 @@ class StoredPaymentMethodComponentTests: XCTestCase {
         let viewController = sut.viewController as? UIAlertController
         XCTAssertNotNil(viewController)
         XCTAssertEqual(viewController?.actions.count, 2)
-        XCTAssertEqual(viewController?.actions.first?.title, ADYLocalizedString("adyen.cancelButton", sut.localizationParameters))
-        XCTAssertEqual(viewController?.actions.last?.title, ADYLocalizedSubmitButtonTitle(with: payment.amount, style: .immediate, sut.localizationParameters))
+        XCTAssertEqual(viewController?.actions.first?.title, localizedString(.cancelButton, sut.localizationParameters))
+        XCTAssertEqual(viewController?.actions.last?.title, localizedSubmitButtonTitle(with: payment.amount, style: .immediate, sut.localizationParameters))
     }
 
     func testLocalizationWithZeroPayment() {
@@ -34,8 +34,8 @@ class StoredPaymentMethodComponentTests: XCTestCase {
         let viewController = sut.viewController as? UIAlertController
         XCTAssertNotNil(viewController)
         XCTAssertEqual(viewController?.actions.count, 2)
-        XCTAssertEqual(viewController?.actions.first?.title, ADYLocalizedString("adyen.cancelButton", sut.localizationParameters))
-        XCTAssertEqual(viewController?.actions.last?.title, ADYLocalizedSubmitButtonTitle(with: payment.amount, style: .immediate, sut.localizationParameters))
+        XCTAssertEqual(viewController?.actions.first?.title, localizedString(.cancelButton, sut.localizationParameters))
+        XCTAssertEqual(viewController?.actions.last?.title, localizedSubmitButtonTitle(with: payment.amount, style: .immediate, sut.localizationParameters))
 
         XCTAssertEqual(viewController?.actions.last?.title, "Confirm preauthorization")
     }
@@ -50,8 +50,8 @@ class StoredPaymentMethodComponentTests: XCTestCase {
         let viewController = sut.viewController as? UIAlertController
         XCTAssertNotNil(viewController)
         XCTAssertEqual(viewController?.actions.count, 2)
-        XCTAssertEqual(viewController?.actions.first?.title, ADYLocalizedString("adyen_cancelButton", sut.localizationParameters))
-        XCTAssertEqual(viewController?.actions.last?.title, ADYLocalizedSubmitButtonTitle(with: payment.amount, style: .immediate, sut.localizationParameters))
+        XCTAssertEqual(viewController?.actions.first?.title, localizedString(.cancelButton, sut.localizationParameters))
+        XCTAssertEqual(viewController?.actions.last?.title, localizedSubmitButtonTitle(with: payment.amount, style: .immediate, sut.localizationParameters))
     }
 
     func testUI() {
@@ -89,10 +89,10 @@ class StoredPaymentMethodComponentTests: XCTestCase {
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(1)) {
             let alertController = sut.viewController as! UIAlertController
 
-            XCTAssertTrue(alertController.actions.contains { $0.title == ADYLocalizedString("adyen.cancelButton", nil) })
-            XCTAssertTrue(alertController.actions.contains { $0.title == ADYLocalizedSubmitButtonTitle(with: payemt.amount, style: .immediate, nil) })
+            XCTAssertTrue(alertController.actions.contains { $0.title == localizedString(.cancelButton, nil) })
+            XCTAssertTrue(alertController.actions.contains { $0.title == localizedSubmitButtonTitle(with: payemt.amount, style: .immediate, nil) })
 
-            let payAction = alertController.actions.first { $0.title == ADYLocalizedSubmitButtonTitle(with: payemt.amount, style: .immediate, nil) }!
+            let payAction = alertController.actions.first { $0.title == localizedSubmitButtonTitle(with: payemt.amount, style: .immediate, nil) }!
 
             payAction.tap()
 
